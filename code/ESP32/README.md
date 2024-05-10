@@ -5,7 +5,7 @@
 </p>
 
 <p>
-Please refer to the <a href="https://github.com/EmailAlert/TS45ToMQTT/wiki">TS45ToMQTT wiki</a> for more information.
+Please refer to the <a href="https://github.com/ClassicDIY/EmailAlert/wiki">EmailAlert wiki</a> for more information.
 </p>
 
 
