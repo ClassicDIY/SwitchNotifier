@@ -19,10 +19,6 @@
 
 #define SMTP_server "smtp.gmail.com"
 #define SMTP_Port 465
-#define sender_email "rossg256@gmail.com"
-#define sender_password "dsow wcrh qthq cmhy"
-#define Recipient_email "graham.a.ross@gmail.com"
-#define Recipient_name "GR"
 #define TZ "EST5EDT,M3.2.0,M11.1.0"
 #define NTP_Server1 "pool.ntp.org"
 #define NTP_Server2 "time.nist.gov"
