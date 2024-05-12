@@ -187,6 +187,11 @@ void handleRoot()
 	s += "</ul>";
 
 	s += "<ul>";
+	s += "<li>Sender password: ";
+	s += (strlen(_senderPassword) > 0) ? "********" : "not set";
+	s += "</ul>";
+
+	s += "<ul>";
 	s += "<li>Recipient Email: ";
 	s += _recipientEmail;
 	s += "</ul>";
