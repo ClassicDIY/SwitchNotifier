@@ -14,5 +14,11 @@ public:
     virtual u_int getUniqueId() = 0;
     virtual std::string getThingName() = 0;
     virtual std::string getDeviceName() = 0;
+    virtual std::string getSMTPServer() = 0;
+    virtual uint16_t getSMTPPort() = 0;
+    virtual std::string getSenderEmail() = 0;
+    virtual std::string getSenderPassword() = 0;
+    virtual std::string getRecipientEmail() = 0;
+    virtual std::string getRecipientName() = 0;
 
 };

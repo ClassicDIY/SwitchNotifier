@@ -18,7 +18,6 @@ namespace EmailAlert
 class IOT : public IOTCallbackInterface
 {
 public:
-    IOT();
     void Init(MQTTCommandInterface* cmdCB);
     boolean Run();
     void Publish(const char *subtopic, const char *value, boolean retained = false);
@@ -29,16 +28,18 @@ public:
     u_int getUniqueId() { return _uniqueId;};
     std::string getThingName();
     std::string getDeviceName();
-    unsigned long PublishRate();
-    void SetPublishRate(unsigned long rate);
+    std::string getSMTPServer();
+    uint16_t getSMTPPort();
+    std::string getSenderEmail();
+    std::string getSenderPassword();
+    std::string getRecipientEmail();
+    std::string getRecipientName();
     bool ProcessCmnd(char *payload, size_t len);
-private:
 
+private:
     MQTTCommandInterface* _cmdCB;
     bool _MQTTConfigured = false;
-    
     bool _lastTelemetery = true; 
-    unsigned long _currentPublishRate;
     u_int _uniqueId = 0; // unique id from mac address NIC segment
 };
 

@@ -3,25 +3,22 @@
 #include <ArduinoJson.h>
 #include "log.h"
 #include "Defines.h"
+#include "IOTCallbackInterface.h"
 
 namespace EmailAlert
 {
-
-//void smtpCallback(SMTP_Status status);
-// void smtpCallback(SMTP_Status status)
-// {
-//     logi("%s", status.info());
-// }
 
 class Emailer
 {
  public:
  	Emailer();
 	~Emailer();
-    void setup();
+    void setup(IOTCallbackInterface* pcb);
+    void sendit(const char * content);
 
  protected:
     SMTPSession* _smtp;
+    IOTCallbackInterface* _pcb;
 };
 
 } // namespace EmailAlert
