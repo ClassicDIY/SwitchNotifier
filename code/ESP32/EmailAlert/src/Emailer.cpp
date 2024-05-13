@@ -30,7 +30,7 @@ void Emailer::setup(IOTCallbackInterface* pcb){
 }
 
 void Emailer::sendit(const char * content){
-
+	logd("SMTP: %s:%d PW: %s From:%s To: (%s)%s", _pcb->getSMTPServer(), _pcb->getSMTPPort(), _pcb->getSenderPassword(), _pcb->getSenderEmail(), _pcb->getRecipientName(), _pcb->getRecipientEmail());
 	ESP_Mail_Session session;
 	session.server.host_name = _pcb->getSMTPServer();
 

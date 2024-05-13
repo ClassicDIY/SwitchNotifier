@@ -1,43 +1,40 @@
 #include "IOT.h"
 #include <IotWebConfOptionalGroup.h>
+#include <IotWebConfTParameter.h>
 
 namespace EmailAlert
 {
 bool _NTPConfigured = false;
+bool _needReset = false;
 AsyncMqttClient _mqttClient;
 TimerHandle_t mqttReconnectTimer;
 DNSServer _dnsServer;
 WebServer _webServer(80);
 HTTPUpdateServer _httpUpdater;
 IotWebConf _iotWebConf(TAG, &_dnsServer, &_webServer, TAG, CONFIG_VERSION);
-char _deviceName[IOTWEBCONF_WORD_LEN];
-char _mqttServer[IOTWEBCONF_WORD_LEN];
-char _mqttPort[NUMBER_CONFIG_LEN];
-char _mqttUserName[IOTWEBCONF_WORD_LEN];
-char _mqttUserPassword[IOTWEBCONF_WORD_LEN];
+
+char msgBuffer[STR_LEN];
 char _willTopic[MQTT_TOPIC_LEN];
 char _rootTopicPrefix[MQTT_TOPIC_LEN];
-char _smtpServer[IOTWEBCONF_WORD_LEN];
-char _smtpPort[NUMBER_CONFIG_LEN];
-char _senderEmail[IOTWEBCONF_WORD_LEN];
-char _senderPassword[IOTWEBCONF_WORD_LEN];
-char _recipientEmail[IOTWEBCONF_WORD_LEN];
-char _recipientName[IOTWEBCONF_WORD_LEN];
 
-iotwebconf::ParameterGroup EMAIL_group = iotwebconf::ParameterGroup("Email", "Email");
-iotwebconf::TextParameter smtpServerParam = iotwebconf::TextParameter("SMTP server", "smtpServer", _smtpServer, IOTWEBCONF_WORD_LEN);
-iotwebconf::NumberParameter smtpPortParam = iotwebconf::NumberParameter("SMTP port", "smtpPort", _smtpPort, NUMBER_CONFIG_LEN);
-iotwebconf::TextParameter senderEmailParam = iotwebconf::TextParameter("Sender Email", "senderEmail", _senderEmail, IOTWEBCONF_WORD_LEN);
-iotwebconf::PasswordParameter senderPasswordParam = iotwebconf::PasswordParameter("Sender password", "senderPassword", _senderPassword, IOTWEBCONF_WORD_LEN);
-iotwebconf::TextParameter recipientEmailParam = iotwebconf::TextParameter("Recipient Email", "recipientEmail", _recipientEmail, IOTWEBCONF_WORD_LEN);
-iotwebconf::TextParameter recipientNameParam = iotwebconf::TextParameter("Recipient Name", "recipientName", _recipientName, IOTWEBCONF_WORD_LEN);
+static const char smtpPorts[][CONFIG_LEN] = { "25", "465", "587", "2525" };
 
-iotwebconf::OptionalParameterGroup  MQTT_group = iotwebconf::OptionalParameterGroup ("MQTT", "MQTT", false);
-iotwebconf::TextParameter deviceNameParam = iotwebconf::TextParameter("Device Name", "CC1", _deviceName, IOTWEBCONF_WORD_LEN);
-iotwebconf::TextParameter mqttServerParam = iotwebconf::TextParameter("MQTT server", "mqttServer", _mqttServer, IOTWEBCONF_WORD_LEN);
-iotwebconf::NumberParameter mqttPortParam = iotwebconf::NumberParameter("MQTT port", "mqttSPort", _mqttPort, NUMBER_CONFIG_LEN);
-iotwebconf::TextParameter mqttUserNameParam = iotwebconf::TextParameter("MQTT user", "mqttUser", _mqttUserName, IOTWEBCONF_WORD_LEN);
-iotwebconf::PasswordParameter mqttUserPasswordParam = iotwebconf::PasswordParameter("MQTT password", "mqttPassword", _mqttUserPassword, IOTWEBCONF_WORD_LEN);
+iotwebconf::ParameterGroup EMAIL_group = iotwebconf::ParameterGroup("Email", "");
+iotwebconf::TextTParameter<CONFIG_LEN> smtpServerParam = iotwebconf::Builder<iotwebconf::TextTParameter<CONFIG_LEN>>("smtpServer").label("SMTP server").defaultValue(SMTP_server).build();
+iotwebconf::SelectTParameter<CONFIG_LEN> smtpPortParam = iotwebconf::Builder<iotwebconf::SelectTParameter<CONFIG_LEN>>("smtpPort").label("SMTP port").
+	optionValues((const char*)smtpPorts).optionNames((const char*)smtpPorts).optionCount(sizeof(smtpPorts) / CONFIG_LEN).nameLength(CONFIG_LEN).defaultValue("465").build();
+iotwebconf::TextTParameter<CONFIG_LEN> senderEmailParam = iotwebconf::Builder<iotwebconf::TextTParameter<CONFIG_LEN>>("senderEmail").label("Sender Email").defaultValue("").build();
+iotwebconf::PasswordTParameter<CONFIG_LEN> senderPasswordParam = iotwebconf::Builder<iotwebconf::PasswordTParameter<CONFIG_LEN>>("senderPassword").label("Sender password").defaultValue("").build();
+iotwebconf::TextTParameter<CONFIG_LEN> recipientEmailParam = iotwebconf::Builder<iotwebconf::TextTParameter<CONFIG_LEN>>("recipientEmail").label("Recipient Email").defaultValue("").build();
+iotwebconf::TextTParameter<CONFIG_LEN> recipientNameParam = iotwebconf::Builder<iotwebconf::TextTParameter<CONFIG_LEN>>("recipientName").label("Recipient Name").defaultValue("").build();
+
+iotwebconf::OptionalParameterGroup  MQTT_group = iotwebconf::OptionalParameterGroup ("MQTT", "", false);
+iotwebconf::TextTParameter<CONFIG_LEN> deviceNameParam = iotwebconf::Builder<iotwebconf::TextTParameter<CONFIG_LEN>>("deviceName").label("Device Name").defaultValue("EA1").build();
+iotwebconf::TextTParameter<CONFIG_LEN> mqttServerParam = iotwebconf::Builder<iotwebconf::TextTParameter<CONFIG_LEN>>("mqttServer").label("MQTT server").defaultValue("").build();
+iotwebconf::IntTParameter<uint16_t> mqttPortParam = iotwebconf::Builder<iotwebconf::IntTParameter<uint16_t>>("mqttSPort").label("MQTT port").defaultValue(1883).min(0).max(65535).build();
+iotwebconf::TextTParameter<CONFIG_LEN> mqttUserNameParam = iotwebconf::Builder<iotwebconf::TextTParameter<CONFIG_LEN>>("mqttUser").label("MQTT user").defaultValue("").build();
+iotwebconf::PasswordTParameter<CONFIG_LEN> mqttUserPasswordParam = iotwebconf::Builder<iotwebconf::PasswordTParameter<CONFIG_LEN>>("mqttPassword").label("MQTT password").defaultValue("").build();
+
 iotwebconf::OptionalGroupHtmlFormatProvider optionalGroupHtmlFormatProvider;
 
 void onMqttConnect(bool sessionPresent)
@@ -64,16 +61,14 @@ void connectToMqtt()
 {
 	if (WiFi.isConnected())
 	{
-		if (strlen(_mqttServer) > 0) // mqtt configured
-		{
+		if (MQTT_group.isActive()) { // mqtt configured?
 			logi("Connecting to MQTT...");
 			int len = strlen(_iotWebConf.getThingName());
 			strncpy(_rootTopicPrefix, _iotWebConf.getThingName(), len);
-			if (_rootTopicPrefix[len - 1] != '/')
-			{
+			if (_rootTopicPrefix[len - 1] != '/') {
 				strcat(_rootTopicPrefix, "/");
 			}
-			strcat(_rootTopicPrefix, _deviceName);
+			strcat(_rootTopicPrefix, deviceNameParam.value());
 
 			sprintf(_willTopic, "%s/tele/LWT", _rootTopicPrefix);
 			_mqttClient.setWill(_willTopic, 0, true, "Offline");
@@ -82,7 +77,6 @@ void connectToMqtt()
 		}
 	}
 }
-
 
 void WiFiEvent(WiFiEvent_t event)
 {
@@ -99,7 +93,9 @@ void WiFiEvent(WiFiEvent_t event)
 		serializeJson(doc, s);
 		s += '\n';
 		Serial.printf(s.c_str()); // send json to flash tool
-		xTimerStart(mqttReconnectTimer, 0); // connect to MQTT once we have wifi
+		if (MQTT_group.isActive()) {// mqtt configured?
+			xTimerStart(mqttReconnectTimer, 0); // connect to MQTT once we have wifi
+		}
 		break;
 	case SYSTEM_EVENT_STA_DISCONNECTED:
 		logi("WiFi lost connection");
@@ -166,52 +162,52 @@ void handleRoot()
 	String s = "<!DOCTYPE html><html lang=\"en\"><head><meta name=\"viewport\" content=\"width=device-width, initial-scale=1, user-scalable=no\"/>";
 	s += "<title>PylonToMQTT</title></head><body>";
 	s += _iotWebConf.getThingName();
-	s += "<ul>";
-	s += "<li>Device Name: ";
-	s += _deviceName;
-	s += "</ul>";
 
 	s += "<ul>";
 	s += "<li>SMTP server: ";
-	s += _smtpServer;
+	s += smtpServerParam.value();
 	s += "</ul>";
 
 	s += "<ul>";
 	s += "<li>SMTP port: ";
-	s += _smtpPort;
+	s += smtpPortParam.value();
 	s += "</ul>";
 
 	s += "<ul>";
 	s += "<li>Sender Email: ";
-	s += _senderEmail;
+	s += senderEmailParam.value();
 	s += "</ul>";
 
 	s += "<ul>";
 	s += "<li>Sender password: ";
-	s += (strlen(_senderPassword) > 0) ? "********" : "not set";
+	s += (strlen(senderPasswordParam.value()) > 0) ? "********" : "not set";
 	s += "</ul>";
 
 	s += "<ul>";
 	s += "<li>Recipient Email: ";
-	s += _recipientEmail;
+	s += recipientEmailParam.value();
 	s += "</ul>";
 	s += "<ul>";
 	s += "<li>Recipient Name: ";
-	s += _recipientName;
+	s += recipientNameParam.value();
 	s += "</ul>";
 	
 	if (MQTT_group.isActive()) {
 		s += "<ul>";
+		s += "<li>Device Name: ";
+		s += deviceNameParam.value();
+		s += "</ul>";
+		s += "<ul>";
 		s += "<li>MQTT server: ";
-		s += _mqttServer;
+		s += mqttServerParam.value();
 		s += "</ul>";
 		s += "<ul>";
 		s += "<li>MQTT port: ";
-		s += _mqttPort;
+		s += mqttPortParam.value();
 		s += "</ul>";
 		s += "<ul>";
 		s += "<li>MQTT user: ";
-		s += _mqttUserName;
+		s += mqttUserNameParam.value();
 		s += "</ul>";
 	}
 	s += "Go to <a href='config'>configure page</a> to change values.";
@@ -221,27 +217,30 @@ void handleRoot()
 
 void configSaved()
 {
-	logi("Configuration was updated.");
+	logi("Configuration was updated, will reboot!.");
+	_needReset = true;
 }
 
-boolean checkParam(iotwebconf::Parameter& param) {
+boolean required(iotwebconf::InputParameter& param) {
 	boolean valid = true;
 	int paramLength = _webServer.arg(param.getId()).length();
 	if (paramLength == 0)
 	{
-		param.errorMessage = "SMTP server is required";
+		snprintf(msgBuffer, STR_LEN, "%s is required\n", param.label);
+		param.errorMessage = msgBuffer;
 		valid = false;
 	}
 	return valid;
 }
+
 boolean formValidator(iotwebconf::WebRequestWrapper* webRequestWrapper)
 {
-	if ( checkParam(smtpServerParam) == false) return false;
-	if ( checkParam(smtpPortParam) == false) return false;
-	if ( checkParam(senderEmailParam) == false) return false;
-	if ( checkParam(senderPasswordParam) == false && strlen(_senderPassword) == 0 ) return false;
-	if ( checkParam(recipientEmailParam) == false) return false;
-	if ( checkParam(recipientNameParam) == false) return false;
+	if ( required(smtpServerParam) == false) return false;
+	if (MQTT_group.isActive()) {
+		if ( required(mqttServerParam) == false) return false;
+		if ( required(deviceNameParam) == false) return false;
+		if ( required(mqttPortParam) == false) return false;
+	}
 	return true;
 }
 
@@ -268,7 +267,6 @@ void IOT::Init(MQTTCommandInterface* cmdCB)
 	_iotWebConf.addParameterGroup(&EMAIL_group);
 	_iotWebConf.setHtmlFormatProvider(&optionalGroupHtmlFormatProvider);
 	_iotWebConf.addParameterGroup(&MQTT_group);
-
 	// setup callbacks for IotWebConf
 	_iotWebConf.setConfigSavedCallback(&configSaved);
 	_iotWebConf.setFormValidator(&formValidator);
@@ -290,24 +288,31 @@ void IOT::Init(MQTTCommandInterface* cmdCB)
 	mqttReconnectTimer = xTimerCreate("mqttTimer", pdMS_TO_TICKS(5000), pdFALSE, (void *)0, reinterpret_cast<TimerCallbackFunction_t>(connectToMqtt));
 	WiFi.onEvent(WiFiEvent);
 	boolean validConfig = _iotWebConf.init();
+	logd("_iotWebConf.init complete");
 	if (!validConfig)
 	{
-		logw("!invalid configuration!");
-		_mqttServer[0] = '\0';
-		strcpy(_mqttPort, "1883");
-		_mqttUserName[0] = '\0';
-		_mqttUserPassword[0] = '\0';
-		strcpy(_smtpServer, SMTP_server);
-		sprintf(_smtpPort, "%d", SMTP_Port);
-		
+		logw("!invalid configuration!, set default values");
+		smtpServerParam.applyDefaultValue();
+		smtpPortParam.applyDefaultValue();
+		senderEmailParam.applyDefaultValue();
+		senderPasswordParam.applyDefaultValue();
+		recipientEmailParam.applyDefaultValue();
+		recipientNameParam.applyDefaultValue();
+		MQTT_group.setActive(false);
+		deviceNameParam.applyDefaultValue();
+		mqttServerParam.applyDefaultValue();
+		mqttPortParam.applyDefaultValue();
+		mqttUserNameParam.applyDefaultValue();
+		mqttUserPasswordParam.applyDefaultValue();
 		_iotWebConf.resetWifiAuthInfo();
 	}
 	else
 	{
+		logi("Valid configuration!");
 		_iotWebConf.skipApStartup(); // Set WIFI_AP_PIN to gnd to force AP mode
-		if (_mqttServer[0] != '\0') // skip if no mqtt configured
+		if (MQTT_group.isActive()) // skip if no mqtt configured
 		{
-			logi("Valid configuration!");
+			
 			_MQTTConfigured = true;
 			_mqttClient.onConnect(onMqttConnect);
 			_mqttClient.onDisconnect(onMqttDisconnect);
@@ -315,16 +320,16 @@ void IOT::Init(MQTTCommandInterface* cmdCB)
 			_mqttClient.onPublish(onMqttPublish);
 
 			IPAddress ip;
-			int port = atoi(_mqttPort);
-			if (ip.fromString(_mqttServer))
+			int port = mqttPortParam.value();
+			if (ip.fromString(mqttServerParam.value()))
 			{
 				_mqttClient.setServer(ip, port);
 			}
 			else
 			{
-				_mqttClient.setServer(_mqttServer, port);
+				_mqttClient.setServer(mqttServerParam.value(), port);
 			}
-			_mqttClient.setCredentials(_mqttUserName, _mqttUserPassword);
+			_mqttClient.setCredentials(mqttUserNameParam.value(), mqttUserPasswordParam.value());
 		}
 	}
 	// generate unique id from mac address NIC segment
@@ -347,6 +352,12 @@ boolean IOT::Run()
 {
 	bool rVal = false;
 	_iotWebConf.doLoop();
+	if (_needReset)
+	{
+		logi("Configuration changed, Rebooting after 1 second.");
+		_iotWebConf.delay(1000);
+		ESP.restart();
+	}
 	if (WiFi.isConnected())
 	{
 		if (_NTPConfigured == false) {
@@ -410,7 +421,6 @@ bool IOT::ProcessCmnd(char *payload, size_t len)
 	return _cmdCB->handleCommand(payload, len);
 }
 
-
 void IOT::Publish(const char *subtopic, const char *value, boolean retained)
 {
 	if (_mqttClient.connected())
@@ -444,48 +454,36 @@ void IOT::PublishTelemetery(bool online) {
 	}
 }
 
-std::string IOT::getRootTopicPrefix() {
-	std::string s(_rootTopicPrefix); 
-	return s; 
-};
-
-std::string IOT::getThingName() {
-	 std::string s(_iotWebConf.getThingName());
-	  return s;
+const char* IOT::getThingName() {
+	return _iotWebConf.getThingName();
 }
 
-std::string IOT::getDeviceName() {
-	 std::string s(_deviceName);
-	  return s;
+const char* IOT::getDeviceName() {
+	return deviceNameParam.value();
 }
 
-std::string IOT::getSMTPServer() {
-	 std::string s(_smtpServer);
-	  return s;
+const char* IOT::getSMTPServer() {
+	return smtpServerParam.value();
 }
 
 uint16_t IOT::getSMTPPort() {
-	 return atoi(_smtpPort);
+	return atoi(smtpPortParam.value());
 }
 
-std::string IOT::getSenderEmail() {
-	 std::string s(_senderEmail);
-	  return s;
+const char* IOT::getSenderEmail() {
+	return senderEmailParam.value();
 }
 
-std::string IOT::getSenderPassword() {
-	 std::string s(_senderPassword);
-	  return s;
+const char* IOT::getSenderPassword() {
+	 return senderPasswordParam.value();
 }
 
-std::string IOT::getRecipientEmail() {
-	 std::string s(_recipientEmail);
-	  return s;
+const char* IOT::getRecipientEmail() {
+	return recipientEmailParam.value();
 }
 
-std::string IOT::getRecipientName() {
-	 std::string s(_recipientName);
-	  return s;
+const char* IOT::getRecipientName() {
+	return recipientNameParam.value();
 }
 
 } // namespace EmailAlert

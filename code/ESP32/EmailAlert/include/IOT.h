@@ -24,16 +24,15 @@ public:
     void Publish(const char *topic, float value, boolean retained = false);
     void PublishMessage(const char* topic, JsonDocument& payload);
     void PublishTelemetery(bool online);
-    std::string getRootTopicPrefix();
     u_int getUniqueId() { return _uniqueId;};
-    std::string getThingName();
-    std::string getDeviceName();
-    std::string getSMTPServer();
+    const char* getThingName();
+    const char* getDeviceName();
+    const char* getSMTPServer();
     uint16_t getSMTPPort();
-    std::string getSenderEmail();
-    std::string getSenderPassword();
-    std::string getRecipientEmail();
-    std::string getRecipientName();
+    const char* getSenderEmail();
+    const char* getSenderPassword();
+    const char* getRecipientEmail();
+    const char* getRecipientName();
     bool ProcessCmnd(char *payload, size_t len);
 
 private:

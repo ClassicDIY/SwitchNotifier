@@ -115,9 +115,7 @@ void loop()
 		}
 	}
 	else {
-		logd(".");
 		feed_watchdog(); // don't reset when not configured
-		delay(500);
 	}
 }
 
