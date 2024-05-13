@@ -1,7 +1,7 @@
 #pragma once
 #include <Arduino.h>
 
-class MQTTCommandInterface
+class MQTTCallbackInterface
 {
 public:
     virtual bool handleCommand(char *payload, size_t len) = 0;

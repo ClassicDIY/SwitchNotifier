@@ -73,12 +73,13 @@ void Wake()
 
 void setup()
 {
-	MQTTCommandInterface* tmp;
+	MQTTCallbackInterface* tmp;
 	Serial.begin(115200);
 	while (!Serial) {}
 	logd("Booting");
-	_iot.Init(tmp);
 	_emailer.setup(&_iot);
+	_iot.Init(&_emailer, tmp);
+	
 	init_watchdog();
 	_lastPublishTimeStamp = millis() + WAKE_PUBLISH_RATE;
 	pinMode(BUTTON_1, INPUT_PULLUP);
@@ -94,9 +95,7 @@ void setup()
 
 void monitorButton(Button& button) {
 	if (button.pressed) {
-		Serial.printf("Button %d has been pressed\n", button.PIN);
-		snprintf(msgBuffer, STR_LEN, "Button %d has been pressed\n", button.PIN);
-		_emailer.sendit(msgBuffer);
+		_emailer.notify(button.PIN);
 		button.pressed = false;
 	}
 }

@@ -10,15 +10,16 @@
 #include <IotWebConfUsing.h>
 #include <IotWebConfESP32HTTPUpdateServer.h>
 #include "Defines.h"
+#include "IOTServiceInterface.h"
 #include "IOTCallbackInterface.h"
-#include "MQTTCommandInterface.h"
+#include "MQTTCallbackInterface.h"
 
 namespace EmailAlert
 {
-class IOT : public IOTCallbackInterface
+class IOT : public IOTServiceInterface
 {
 public:
-    void Init(MQTTCommandInterface* cmdCB);
+    void Init(IOTCallbackInterface* iotCB, MQTTCallbackInterface* cmdCB);
     boolean Run();
     void Publish(const char *subtopic, const char *value, boolean retained = false);
     void Publish(const char *topic, float value, boolean retained = false);
@@ -27,16 +28,13 @@ public:
     u_int getUniqueId() { return _uniqueId;};
     const char* getThingName();
     const char* getDeviceName();
-    const char* getSMTPServer();
-    uint16_t getSMTPPort();
-    const char* getSenderEmail();
-    const char* getSenderPassword();
-    const char* getRecipientEmail();
-    const char* getRecipientName();
+    IOTCallbackInterface* IOTCB() { return _iotCB;}
+
     bool ProcessCmnd(char *payload, size_t len);
 
 private:
-    MQTTCommandInterface* _cmdCB;
+    MQTTCallbackInterface* _cmdCB;
+    IOTCallbackInterface* _iotCB;
     bool _MQTTConfigured = false;
     bool _lastTelemetery = true; 
     u_int _uniqueId = 0; // unique id from mac address NIC segment
