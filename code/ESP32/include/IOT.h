@@ -21,9 +21,9 @@ class IOT : public IOTServiceInterface
 public:
     void Init(IOTCallbackInterface* iotCB, MQTTCallbackInterface* cmdCB);
     boolean Run();
-    void Publish(const char *subtopic, const char *value, boolean retained = false);
-    void Publish(const char *topic, float value, boolean retained = false);
-    void PublishMessage(const char* topic, JsonDocument& payload);
+    void Publish(const char* subtopic, const char *value, boolean retained = false);
+    void Publish(const char* topic, float value, boolean retained = false);
+    void Publish(const char* topic, JsonDocument& payload, boolean retained = false);
     void PublishTelemetery(bool online);
     u_int getUniqueId() { return _uniqueId;};
     const char* getThingName();

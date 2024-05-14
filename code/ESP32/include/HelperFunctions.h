@@ -13,3 +13,13 @@ boolean inline requiredParam(iotwebconf::WebRequestWrapper* webRequestWrapper, i
 	}
 	return valid;
 }
+
+unsigned long inline getTime() {
+  time_t now;
+  struct tm timeinfo;
+  if (!getLocalTime(&timeinfo)) {
+    return(0);
+  }
+  time(&now);
+  return now;
+}

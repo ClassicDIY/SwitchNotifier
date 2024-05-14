@@ -1,7 +1,7 @@
 #include "IOT.h"
 #include <IotWebConfOptionalGroup.h>
 #include <IotWebConfTParameter.h>
-#include "InlineFunctions.h"
+#include "HelperFunctions.h"
 
 namespace SwitchNotifier
 {
@@ -367,20 +367,18 @@ void IOT::Publish(const char *topic, float value, boolean retained) {
 	Publish(topic, buf, retained);
 }
 
-void IOT::PublishMessage(const char* topic, JsonDocument& payload) {
-	if (_mqttClient.connected()) {
-		String s;
-		serializeJson(payload, s);
-		if (_mqttClient.publish(topic, 0, false, s.c_str(), s.length()) == 0) {
-			loge("**** Payload exceeds MAX MQTT Packet Size");
-		}
-	}
+void IOT::Publish(const char* topic, JsonDocument& payload, boolean retained) {
+	String s;
+	serializeJson(payload, s);
+	Publish(topic, s.c_str(), retained);
 }
 
 void IOT::PublishTelemetery(bool online) {
-	if (_lastTelemetery != online){
-		_lastTelemetery = online;
-		_mqttClient.publish(_willTopic, 0, true, online ? "Online": "Offline", 7);
+	if (_mqttClient.connected()) {
+		if (_lastTelemetery != online){
+			_lastTelemetery = online;
+			_mqttClient.publish(_willTopic, 0, true, online ? "Online": "Offline", 7);
+		}
 	}
 }
 

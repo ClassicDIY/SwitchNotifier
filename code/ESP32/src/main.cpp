@@ -56,13 +56,10 @@ void setup()
 	logd("Booting");
 	_notifier.setup(&_iot);
 	_iot.Init(&_notifier, tmp);
-	
 	init_watchdog();
 	_lastPublishTimeStamp = millis() + WAKE_PUBLISH_RATE;
-
 	logd("Done setup");
 }
-
 
 void loop()
 {

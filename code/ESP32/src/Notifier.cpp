@@ -1,6 +1,6 @@
 #include <WiFi.h>
 #include <ESP_Mail_Client.h>
-#include "InlineFunctions.h"
+#include "HelperFunctions.h"
 #include "Notifier.h"
 #include "Log.h"
 
@@ -149,22 +149,24 @@ void Notifier::run(){
 
 void Notifier::notify(uint8_t pin){
 	logi("Button %d has been pressed\n", pin);
+	JsonDocument doc;
+	doc["TimeStamp"] = getTime();
 	switch (pin){
 		case BUTTON_1:
 			sendit(buttonParam1.value());
-			_pcb->Publish("Event", "1", false);
+			_pcb->Publish("Switch_1", doc, false);
 			break;
 		case BUTTON_2:
 			sendit(buttonParam2.value());
-			_pcb->Publish("Event", "2", false);
+			_pcb->Publish("Switch_2", doc, false);
 			break;
 		case BUTTON_3:
 			sendit(buttonParam3.value());
-			_pcb->Publish("Event", "3", false);
+			_pcb->Publish("Switch_3",doc, false);
 			break;
 		case BUTTON_4:
 			sendit(buttonParam4.value());
-			_pcb->Publish("Event", "4", false);
+			_pcb->Publish("Switch_4", doc, false);
 			break;
 	}
 }
