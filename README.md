@@ -1,7 +1,7 @@
 # ESP32 Switch Notifier - Simple email/mqtt notifier when a digitalIO changes
 
 <p align="center">
-<img src=https://github.com/ClassicDIY/SwitchNotifier/blob/main/pictures/SIM7600G.png width=500>
+<img src=https://github.com/ClassicDIY/SwitchNotifier/blob/main/pictures/SIM7600G.PNG width=500>
 </p>
 
 <p>
