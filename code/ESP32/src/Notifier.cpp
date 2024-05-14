@@ -7,6 +7,7 @@
 namespace SwitchNotifier
 {
 static const char smtpPorts[][CONFIG_LEN] = { "25", "465", "587", "2525" };
+iotwebconf::ParameterGroup Notifier_group = iotwebconf::ParameterGroup("Notifier", "Notifier");
 iotwebconf::ParameterGroup SMTP_group = iotwebconf::ParameterGroup("Email", "SMTP");
 iotwebconf::TextTParameter<CONFIG_LEN> smtpServerParam = iotwebconf::Builder<iotwebconf::TextTParameter<CONFIG_LEN>>("smtpServer").label("SMTP server").defaultValue(SMTP_server).build();
 iotwebconf::SelectTParameter<CONFIG_LEN> smtpPortParam = iotwebconf::Builder<iotwebconf::SelectTParameter<CONFIG_LEN>>("smtpPort").label("SMTP port").
@@ -16,7 +17,7 @@ iotwebconf::PasswordTParameter<CONFIG_LEN> senderPasswordParam = iotwebconf::Bui
 iotwebconf::TextTParameter<CONFIG_LEN> recipientEmailParam = iotwebconf::Builder<iotwebconf::TextTParameter<CONFIG_LEN>>("recipientEmail").label("Recipient Email").defaultValue("").build();
 iotwebconf::TextTParameter<CONFIG_LEN> recipientNameParam = iotwebconf::Builder<iotwebconf::TextTParameter<CONFIG_LEN>>("recipientName").label("Recipient Name").defaultValue("").build();
 
-iotwebconf::ParameterGroup EMAIL_group = iotwebconf::ParameterGroup("Email", "Email messages");
+iotwebconf::ParameterGroup Button_Group = iotwebconf::ParameterGroup("Button_Group", "Email messages");
 iotwebconf::TextTParameter<CONFIG_LEN> button1 = iotwebconf::Builder<iotwebconf::TextTParameter<CONFIG_LEN>>("button1").label("Email text for button 1").defaultValue("Button 1 has been pressed").build();
 iotwebconf::TextTParameter<CONFIG_LEN> button2 = iotwebconf::Builder<iotwebconf::TextTParameter<CONFIG_LEN>>("button2").label("Email text for button 2").defaultValue("Button 1 has been pressed").build();
 iotwebconf::TextTParameter<CONFIG_LEN> button3 = iotwebconf::Builder<iotwebconf::TextTParameter<CONFIG_LEN>>("button3").label("Email text for button 3").defaultValue("Button 1 has been pressed").build();
@@ -96,11 +97,12 @@ void Notifier::setup(IOTServiceInterface* pcb){
 	SMTP_group.addItem(&senderPasswordParam);
 	SMTP_group.addItem(&recipientEmailParam);
 	SMTP_group.addItem(&recipientNameParam);
-	EMAIL_group.addItem(&button1);
-	EMAIL_group.addItem(&button2);
-	EMAIL_group.addItem(&button3);
-	EMAIL_group.addItem(&button4);
-	SMTP_group.addItem(&EMAIL_group);
+	Button_Group.addItem(&button1);
+	Button_Group.addItem(&button2);
+	Button_Group.addItem(&button3);
+	Button_Group.addItem(&button4);
+	Notifier_group.addItem(&SMTP_group);
+	Notifier_group.addItem(&Button_Group);
 }
 void Notifier::notify(uint8_t pin){
 	logi("Button %d has been pressed\n", pin);
