@@ -154,18 +154,22 @@ void Notifier::notify(uint8_t pin){
 	switch (pin){
 		case BUTTON_1:
 			sendit(buttonParam1.value());
+			doc["Message"] = buttonParam1.value();
 			_pcb->Publish("Switch_1", doc, false);
 			break;
 		case BUTTON_2:
 			sendit(buttonParam2.value());
+			doc["Message"] = buttonParam2.value();
 			_pcb->Publish("Switch_2", doc, false);
 			break;
 		case BUTTON_3:
 			sendit(buttonParam3.value());
+			doc["Message"] = buttonParam3.value();
 			_pcb->Publish("Switch_3",doc, false);
 			break;
 		case BUTTON_4:
 			sendit(buttonParam4.value());
+			doc["Message"] = buttonParam4.value();
 			_pcb->Publish("Switch_4", doc, false);
 			break;
 	}
