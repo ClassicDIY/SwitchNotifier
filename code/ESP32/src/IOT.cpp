@@ -142,22 +142,20 @@ void handleRoot() {
 	}
 	String s = "<!DOCTYPE html><html lang=\"en\"><head><meta name=\"viewport\" content=\"width=device-width, initial-scale=1, user-scalable=no\"/>";
 	s += "<title>PylonToMQTT</title></head><body>";
+	s += "<h2>";
 	s += _iotWebConf.getThingName();
+	s += "</h2><hr><p>";
 	s += _iot.IOTCB()->getRootHTML();
+	s += "</p>";
 	if (MQTT_group.isActive()) {
+		s += "MQTT:";
 		s += "<ul>";
 		s += "<li>Device Name: ";
 		s += deviceNameParam.value();
-		s += "</ul>";
-		s += "<ul>";
 		s += "<li>MQTT server: ";
 		s += mqttServerParam.value();
-		s += "</ul>";
-		s += "<ul>";
 		s += "<li>MQTT port: ";
 		s += mqttPortParam.value();
-		s += "</ul>";
-		s += "<ul>";
 		s += "<li>MQTT user: ";
 		s += mqttUserNameParam.value();
 		s += "</ul>";

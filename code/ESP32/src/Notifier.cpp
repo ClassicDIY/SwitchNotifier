@@ -12,16 +12,16 @@ iotwebconf::ParameterGroup SMTP_group = iotwebconf::ParameterGroup("Email", "SMT
 iotwebconf::TextTParameter<CONFIG_LEN> smtpServerParam = iotwebconf::Builder<iotwebconf::TextTParameter<CONFIG_LEN>>("smtpServer").label("SMTP server").defaultValue(SMTP_server).build();
 iotwebconf::SelectTParameter<CONFIG_LEN> smtpPortParam = iotwebconf::Builder<iotwebconf::SelectTParameter<CONFIG_LEN>>("smtpPort").label("SMTP port").
 	optionValues((const char*)smtpPorts).optionNames((const char*)smtpPorts).optionCount(sizeof(smtpPorts) / CONFIG_LEN).nameLength(CONFIG_LEN).defaultValue("465").build();
-iotwebconf::TextTParameter<CONFIG_LEN> senderEmailParam = iotwebconf::Builder<iotwebconf::TextTParameter<CONFIG_LEN>>("senderEmail").label("Sender Email").defaultValue("").build();
-iotwebconf::PasswordTParameter<CONFIG_LEN> senderPasswordParam = iotwebconf::Builder<iotwebconf::PasswordTParameter<CONFIG_LEN>>("senderPassword").label("Sender password").defaultValue("").build();
-iotwebconf::TextTParameter<CONFIG_LEN> recipientEmailParam = iotwebconf::Builder<iotwebconf::TextTParameter<CONFIG_LEN>>("recipientEmail").label("Recipient Email").defaultValue("").build();
-iotwebconf::TextTParameter<CONFIG_LEN> recipientNameParam = iotwebconf::Builder<iotwebconf::TextTParameter<CONFIG_LEN>>("recipientName").label("Recipient Name").defaultValue("").build();
+iotwebconf::TextTParameter<STR_LEN> senderEmailParam = iotwebconf::Builder<iotwebconf::TextTParameter<STR_LEN>>("senderEmail").label("Sender Email").defaultValue("").build();
+iotwebconf::PasswordTParameter<STR_LEN> senderPasswordParam = iotwebconf::Builder<iotwebconf::PasswordTParameter<STR_LEN>>("senderPassword").label("Sender password").defaultValue("").build();
+iotwebconf::TextTParameter<STR_LEN> recipientEmailParam = iotwebconf::Builder<iotwebconf::TextTParameter<STR_LEN>>("recipientEmail").label("Recipient Email").defaultValue("").build();
+iotwebconf::TextTParameter<STR_LEN> recipientNameParam = iotwebconf::Builder<iotwebconf::TextTParameter<STR_LEN>>("recipientName").label("Recipient Name").defaultValue("").build();
 
 iotwebconf::ParameterGroup Button_Group = iotwebconf::ParameterGroup("Button_Group", "Email messages");
-iotwebconf::TextTParameter<CONFIG_LEN> buttonParam1 = iotwebconf::Builder<iotwebconf::TextTParameter<CONFIG_LEN>>("buttonParam1").label("Email text for button 1").defaultValue("Button 1 has been pressed").build();
-iotwebconf::TextTParameter<CONFIG_LEN> buttonParam2 = iotwebconf::Builder<iotwebconf::TextTParameter<CONFIG_LEN>>("buttonParam2").label("Email text for button 2").defaultValue("Button 1 has been pressed").build();
-iotwebconf::TextTParameter<CONFIG_LEN> buttonParam3 = iotwebconf::Builder<iotwebconf::TextTParameter<CONFIG_LEN>>("buttonParam3").label("Email text for button 3").defaultValue("Button 1 has been pressed").build();
-iotwebconf::TextTParameter<CONFIG_LEN> buttonParam4 = iotwebconf::Builder<iotwebconf::TextTParameter<CONFIG_LEN>>("buttonParam4").label("Email text for button 4").defaultValue("Button 1 has been pressed").build();
+iotwebconf::TextTParameter<STR_LEN> buttonParam1 = iotwebconf::Builder<iotwebconf::TextTParameter<STR_LEN>>("buttonParam1").label("Email text for button 1").defaultValue("Button 1 has been pressed").build();
+iotwebconf::TextTParameter<STR_LEN> buttonParam2 = iotwebconf::Builder<iotwebconf::TextTParameter<STR_LEN>>("buttonParam2").label("Email text for button 2").defaultValue("Button 1 has been pressed").build();
+iotwebconf::TextTParameter<STR_LEN> buttonParam3 = iotwebconf::Builder<iotwebconf::TextTParameter<STR_LEN>>("buttonParam3").label("Email text for button 3").defaultValue("Button 1 has been pressed").build();
+iotwebconf::TextTParameter<STR_LEN> buttonParam4 = iotwebconf::Builder<iotwebconf::TextTParameter<STR_LEN>>("buttonParam4").label("Email text for button 4").defaultValue("Button 1 has been pressed").build();
 
 
 Button button1 = {BUTTON_1, false};
@@ -60,28 +60,18 @@ Notifier::~Notifier()
 
 String Notifier::getRootHTML() {
 	String s;
+	s += "Email:";
 	s += "<ul>";
 	s += "<li>SMTP server: ";
 	s += smtpServerParam.value();
-	s += "</ul>";
-	s += "<ul>";
 	s += "<li>SMTP port: ";
 	s += smtpPortParam.value();
-	s += "</ul>";
-	s += "<ul>";
 	s += "<li>Sender Email: ";
 	s += senderEmailParam.value();
-	s += "</ul>";
-	s += "<ul>";
 	s += "<li>Sender password: ";
-	// s += (strlen(senderPasswordParam.value()) > 0) ? "********" : "not set";
-		s += senderPasswordParam.value();
-	s += "</ul>";
-	s += "<ul>";
+	s += (strlen(senderPasswordParam.value()) > 0) ? "********" : "not set";
 	s += "<li>Recipient Email: ";
 	s += recipientEmailParam.value();
-	s += "</ul>";
-	s += "<ul>";
 	s += "<li>Recipient Name: ";
 	s += recipientNameParam.value();
 	s += "</ul>";
@@ -89,13 +79,10 @@ String Notifier::getRootHTML() {
 	s += "<ul>";
 	s += "<li>Message 1: ";
 	s += buttonParam1.value();
-	s += "</ul>";
 	s += "<li>Message 2: ";
 	s += buttonParam2.value();
-	s += "</ul>";
 	s += "<li>Message 3: ";
 	s += buttonParam3.value();
-	s += "</ul>";
 	s += "<li>Message 4: ";
 	s += buttonParam4.value();
 	s += "</ul>";
