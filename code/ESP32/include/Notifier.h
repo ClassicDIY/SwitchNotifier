@@ -11,14 +11,20 @@
 namespace SwitchNotifier
 {
 
+struct Button {
+	const uint8_t PIN;
+	bool pressed;
+};
+
 class Notifier : public IOTCallbackInterface
 {
  public:
  	Notifier();
 	~Notifier();
     void setup(IOTServiceInterface* pcb);
+    void run();
     void notify(uint8_t pin);
-
+    void monitorButton(Button& button);
     //IOTCallbackInterface 
     String getRootHTML() ;
     iotwebconf::ParameterGroup* parameterGroup() ;

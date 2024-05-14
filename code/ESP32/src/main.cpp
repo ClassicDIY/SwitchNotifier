@@ -16,29 +16,6 @@ unsigned long _lastPublishTimeStamp = 0;
 unsigned long _currentPublishRate = WAKE_PUBLISH_RATE; // rate currently being used
 unsigned long _wakePublishRate = WAKE_PUBLISH_RATE; // wake publish rate set by config or mqtt command
 boolean _stayAwake = false;
-char msgBuffer[STR_LEN];
-
-struct Button {
-	const uint8_t PIN;
-	bool pressed;
-};
-Button button1 = {BUTTON_1, false};
-Button button2 = {BUTTON_2, false};
-Button button3 = {BUTTON_3, false};
-Button button4 = {BUTTON_4, false};
-
-void IRAM_ATTR isr1() {
-	button1.pressed = true;
-}
-void IRAM_ATTR isr2() {
-	button2.pressed = true;
-}
-void IRAM_ATTR isr3() {
-	button3.pressed = true;
-}
-void IRAM_ATTR isr4() {
-	button4.pressed = true;
-}
 
 void IRAM_ATTR resetModule()
 {
@@ -82,23 +59,10 @@ void setup()
 	
 	init_watchdog();
 	_lastPublishTimeStamp = millis() + WAKE_PUBLISH_RATE;
-	pinMode(BUTTON_1, INPUT_PULLUP);
-	attachInterrupt(button1.PIN, isr1, FALLING);
-	pinMode(BUTTON_2, INPUT_PULLUP);
-	attachInterrupt(button2.PIN, isr2, FALLING);
-	pinMode(BUTTON_3, INPUT_PULLUP);
-	attachInterrupt(button3.PIN, isr3, FALLING);
-	pinMode(BUTTON_4, INPUT_PULLUP);
-	attachInterrupt(button4.PIN, isr4, FALLING);
+
 	logd("Done setup");
 }
 
-void monitorButton(Button& button) {
-	if (button.pressed) {
-		_notifier.notify(button.PIN);
-		button.pressed = false;
-	}
-}
 
 void loop()
 {
@@ -106,10 +70,7 @@ void loop()
 		if (_lastPublishTimeStamp < millis())
 		{
 			feed_watchdog();
-			monitorButton(button1);
-			monitorButton(button2);
-			monitorButton(button3);
-			monitorButton(button4);
+			_notifier.run();
 			_lastPublishTimeStamp = millis() + _currentPublishRate;
 		}
 	}

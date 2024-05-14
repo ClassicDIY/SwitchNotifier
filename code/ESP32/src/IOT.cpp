@@ -14,11 +14,10 @@ WebServer _webServer(80);
 HTTPUpdateServer _httpUpdater;
 IotWebConf _iotWebConf(TAG, &_dnsServer, &_webServer, TAG, CONFIG_VERSION);
 
-char msgBuffer[STR_LEN];
 char _willTopic[MQTT_TOPIC_LEN];
 char _rootTopicPrefix[MQTT_TOPIC_LEN];
 
-iotwebconf::OptionalParameterGroup  MQTT_group = iotwebconf::OptionalParameterGroup ("MQTT", "", false);
+iotwebconf::OptionalParameterGroup  MQTT_group = iotwebconf::OptionalParameterGroup ("MQTT", "MQTT", false);
 iotwebconf::TextTParameter<CONFIG_LEN> deviceNameParam = iotwebconf::Builder<iotwebconf::TextTParameter<CONFIG_LEN>>("deviceName").label("Device Name").defaultValue("EA1").build();
 iotwebconf::TextTParameter<CONFIG_LEN> mqttServerParam = iotwebconf::Builder<iotwebconf::TextTParameter<CONFIG_LEN>>("mqttServer").label("MQTT server").defaultValue("").build();
 iotwebconf::IntTParameter<uint16_t> mqttPortParam = iotwebconf::Builder<iotwebconf::IntTParameter<uint16_t>>("mqttSPort").label("MQTT port").defaultValue(1883).min(0).max(65535).build();
@@ -27,8 +26,7 @@ iotwebconf::PasswordTParameter<CONFIG_LEN> mqttUserPasswordParam = iotwebconf::B
 
 iotwebconf::OptionalGroupHtmlFormatProvider optionalGroupHtmlFormatProvider;
 
-void onMqttConnect(bool sessionPresent)
-{
+void onMqttConnect(bool sessionPresent) {
 	logd("Connected to MQTT. Session present: %d", sessionPresent);
 	char buf[MQTT_TOPIC_LEN];
 	sprintf(buf, "%s/cmnd/#", _rootTopicPrefix);
@@ -37,8 +35,7 @@ void onMqttConnect(bool sessionPresent)
 	logi("Subscribed to [%s], qos: 0", buf);
 }
 
-void onMqttDisconnect(AsyncMqttClientDisconnectReason reason)
-{
+void onMqttDisconnect(AsyncMqttClientDisconnectReason reason) {
 	logi("Disconnected from MQTT. Reason: %d", (int8_t)reason);
 	if (WiFi.isConnected())
 	{
@@ -47,8 +44,7 @@ void onMqttDisconnect(AsyncMqttClientDisconnectReason reason)
 	memset (_rootTopicPrefix, 0, MQTT_TOPIC_LEN);
 }
 
-void connectToMqtt()
-{
+void connectToMqtt() {
 	if (WiFi.isConnected())
 	{
 		if (MQTT_group.isActive()) { // mqtt configured?
@@ -59,7 +55,6 @@ void connectToMqtt()
 				strcat(_rootTopicPrefix, "/");
 			}
 			strcat(_rootTopicPrefix, deviceNameParam.value());
-
 			sprintf(_willTopic, "%s/tele/LWT", _rootTopicPrefix);
 			_mqttClient.setWill(_willTopic, 0, true, "Offline");
 			_mqttClient.connect();
@@ -68,8 +63,7 @@ void connectToMqtt()
 	}
 }
 
-void WiFiEvent(WiFiEvent_t event)
-{
+void WiFiEvent(WiFiEvent_t event) {
 	logd("[WiFi-event] event: %d", event);
 	String s;
 	JsonDocument doc;
@@ -96,13 +90,11 @@ void WiFiEvent(WiFiEvent_t event)
 	}
 }
 
-void onMqttPublish(uint16_t packetId)
-{
+void onMqttPublish(uint16_t packetId) {
 	logi("Publish acknowledged.  packetId: %d", packetId);
 }
 
-void onMqttMessage(char *topic, char *payload, AsyncMqttClientMessageProperties properties, size_t len, size_t index, size_t total)
-{
+void onMqttMessage(char *topic, char *payload, AsyncMqttClientMessageProperties properties, size_t len, size_t index, size_t total) {
 	logd("MQTT Message arrived [%s]  qos: %d len: %d index: %d total: %d", topic, properties.qos, len, index, total);
 	printHexString(payload, len);
 	bool messageProcessed = _iot.ProcessCmnd(payload, len);
@@ -141,8 +133,7 @@ void onMqttMessage(char *topic, char *payload, AsyncMqttClientMessageProperties 
 /**
  * Handle web requests to "/" path.
  */
-void handleRoot()
-{
+void handleRoot() {
 	// -- Let IotWebConf test and handle captive portal requests.
 	if (_iotWebConf.handleCaptivePortal())
 	{
@@ -180,14 +171,12 @@ void handleRoot()
 	_webServer.send(200, "text/html", s);
 }
 
-void configSaved()
-{
+void configSaved() {
 	logi("Configuration was updated, will reboot!.");
 	_needReset = true;
 }
 
-boolean formValidator(iotwebconf::WebRequestWrapper* webRequestWrapper)
-{
+boolean formValidator(iotwebconf::WebRequestWrapper* webRequestWrapper) {
 	if (_iot.IOTCB()->validate(webRequestWrapper) == false) return false;
 	if (MQTT_group.isActive()) {
 		if ( requiredParam(webRequestWrapper, mqttServerParam) == false) return false;
@@ -197,8 +186,7 @@ boolean formValidator(iotwebconf::WebRequestWrapper* webRequestWrapper)
 	return true;
 }
 
-void IOT::Init(IOTCallbackInterface* iotCB, MQTTCallbackInterface* cmdCB)
-{
+void IOT::Init(IOTCallbackInterface* iotCB, MQTTCallbackInterface* cmdCB) {
 	_iotCB = iotCB;
 	_cmdCB = cmdCB;
 	pinMode(FACTORY_RESET_PIN, INPUT_PULLUP);
@@ -296,8 +284,7 @@ void IOT::Init(IOTCallbackInterface* iotCB, MQTTCallbackInterface* cmdCB)
 	logd("Setup done");
 }
 
-boolean IOT::Run()
-{
+boolean IOT::Run() {
 	bool rVal = false;
 	_iotWebConf.doLoop();
 	if (_needReset)
@@ -364,34 +351,31 @@ boolean IOT::Run()
 	return rVal;
 }
 
-bool IOT::ProcessCmnd(char *payload, size_t len)
-{
+bool IOT::ProcessCmnd(char *payload, size_t len) {
 	return _cmdCB->handleCommand(payload, len);
 }
 
-void IOT::Publish(const char *subtopic, const char *value, boolean retained)
-{
-	if (_mqttClient.connected())
-	{
+void IOT::Publish(const char *subtopic, const char *value, boolean retained) {
+	if (_mqttClient.connected()) {
 		char buf[MQTT_TOPIC_LEN];
 		sprintf(buf, "%s/stat/%s", _rootTopicPrefix, subtopic);
 		_mqttClient.publish(buf, 0, retained, value);
 	}
 }
 
-void IOT::Publish(const char *topic, float value, boolean retained)
-{
+void IOT::Publish(const char *topic, float value, boolean retained) {
 	char buf[256];
 	snprintf_P(buf, sizeof(buf), "%.1f", value);
 	Publish(topic, buf, retained);
 }
 
 void IOT::PublishMessage(const char* topic, JsonDocument& payload) {
-	String s;
-	serializeJson(payload, s);
-	if (_mqttClient.publish(topic, 0, false, s.c_str(), s.length()) == 0)
-	{
-		loge("**** Payload exceeds MAX MQTT Packet Size");
+	if (_mqttClient.connected()) {
+		String s;
+		serializeJson(payload, s);
+		if (_mqttClient.publish(topic, 0, false, s.c_str(), s.length()) == 0) {
+			loge("**** Payload exceeds MAX MQTT Packet Size");
+		}
 	}
 }
 

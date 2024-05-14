@@ -18,10 +18,30 @@ iotwebconf::TextTParameter<CONFIG_LEN> recipientEmailParam = iotwebconf::Builder
 iotwebconf::TextTParameter<CONFIG_LEN> recipientNameParam = iotwebconf::Builder<iotwebconf::TextTParameter<CONFIG_LEN>>("recipientName").label("Recipient Name").defaultValue("").build();
 
 iotwebconf::ParameterGroup Button_Group = iotwebconf::ParameterGroup("Button_Group", "Email messages");
-iotwebconf::TextTParameter<CONFIG_LEN> button1 = iotwebconf::Builder<iotwebconf::TextTParameter<CONFIG_LEN>>("button1").label("Email text for button 1").defaultValue("Button 1 has been pressed").build();
-iotwebconf::TextTParameter<CONFIG_LEN> button2 = iotwebconf::Builder<iotwebconf::TextTParameter<CONFIG_LEN>>("button2").label("Email text for button 2").defaultValue("Button 1 has been pressed").build();
-iotwebconf::TextTParameter<CONFIG_LEN> button3 = iotwebconf::Builder<iotwebconf::TextTParameter<CONFIG_LEN>>("button3").label("Email text for button 3").defaultValue("Button 1 has been pressed").build();
-iotwebconf::TextTParameter<CONFIG_LEN> button4 = iotwebconf::Builder<iotwebconf::TextTParameter<CONFIG_LEN>>("button4").label("Email text for button 4").defaultValue("Button 1 has been pressed").build();
+iotwebconf::TextTParameter<CONFIG_LEN> buttonParam1 = iotwebconf::Builder<iotwebconf::TextTParameter<CONFIG_LEN>>("buttonParam1").label("Email text for button 1").defaultValue("Button 1 has been pressed").build();
+iotwebconf::TextTParameter<CONFIG_LEN> buttonParam2 = iotwebconf::Builder<iotwebconf::TextTParameter<CONFIG_LEN>>("buttonParam2").label("Email text for button 2").defaultValue("Button 1 has been pressed").build();
+iotwebconf::TextTParameter<CONFIG_LEN> buttonParam3 = iotwebconf::Builder<iotwebconf::TextTParameter<CONFIG_LEN>>("buttonParam3").label("Email text for button 3").defaultValue("Button 1 has been pressed").build();
+iotwebconf::TextTParameter<CONFIG_LEN> buttonParam4 = iotwebconf::Builder<iotwebconf::TextTParameter<CONFIG_LEN>>("buttonParam4").label("Email text for button 4").defaultValue("Button 1 has been pressed").build();
+
+
+Button button1 = {BUTTON_1, false};
+Button button2 = {BUTTON_2, false};
+Button button3 = {BUTTON_3, false};
+Button button4 = {BUTTON_4, false};
+
+void IRAM_ATTR isr1() {
+	button1.pressed = true;
+}
+void IRAM_ATTR isr2() {
+	button2.pressed = true;
+}
+void IRAM_ATTR isr3() {
+	button3.pressed = true;
+}
+void IRAM_ATTR isr4() {
+	button4.pressed = true;
+}
+
 
 void smtpCallback(SMTP_Status status)
 {
@@ -65,11 +85,25 @@ String Notifier::getRootHTML() {
 	s += "<li>Recipient Name: ";
 	s += recipientNameParam.value();
 	s += "</ul>";
+	s += "Messages:";
+	s += "<ul>";
+	s += "<li>Message 1: ";
+	s += buttonParam1.value();
+	s += "</ul>";
+	s += "<li>Message 2: ";
+	s += buttonParam2.value();
+	s += "</ul>";
+	s += "<li>Message 3: ";
+	s += buttonParam3.value();
+	s += "</ul>";
+	s += "<li>Message 4: ";
+	s += buttonParam4.value();
+	s += "</ul>";
 	return s;
 }
 
 iotwebconf::ParameterGroup* Notifier::parameterGroup() {
-	return &SMTP_group;
+	return &Notifier_group;
 }
 
 bool Notifier::validate(iotwebconf::WebRequestWrapper* webRequestWrapper) {
@@ -97,27 +131,53 @@ void Notifier::setup(IOTServiceInterface* pcb){
 	SMTP_group.addItem(&senderPasswordParam);
 	SMTP_group.addItem(&recipientEmailParam);
 	SMTP_group.addItem(&recipientNameParam);
-	Button_Group.addItem(&button1);
-	Button_Group.addItem(&button2);
-	Button_Group.addItem(&button3);
-	Button_Group.addItem(&button4);
+	Button_Group.addItem(&buttonParam1);
+	Button_Group.addItem(&buttonParam2);
+	Button_Group.addItem(&buttonParam3);
+	Button_Group.addItem(&buttonParam4);
 	Notifier_group.addItem(&SMTP_group);
 	Notifier_group.addItem(&Button_Group);
+	pinMode(BUTTON_1, INPUT_PULLUP);
+	attachInterrupt(button1.PIN, isr1, FALLING);
+	pinMode(BUTTON_2, INPUT_PULLUP);
+	attachInterrupt(button2.PIN, isr2, FALLING);
+	pinMode(BUTTON_3, INPUT_PULLUP);
+	attachInterrupt(button3.PIN, isr3, FALLING);
+	pinMode(BUTTON_4, INPUT_PULLUP);
+	attachInterrupt(button4.PIN, isr4, FALLING);
 }
+
+void Notifier::monitorButton(Button& button) {
+	if (button.pressed) {
+		notify(button.PIN);
+		button.pressed = false;
+	}
+}
+void Notifier::run(){
+	monitorButton(button1);
+	monitorButton(button2);
+	monitorButton(button3);
+	monitorButton(button4);
+}
+
 void Notifier::notify(uint8_t pin){
 	logi("Button %d has been pressed\n", pin);
 	switch (pin){
 		case BUTTON_1:
-			sendit(button1.value());
+			sendit(buttonParam1.value());
+			_pcb->Publish("Event", "1", false);
 			break;
 		case BUTTON_2:
-			sendit(button2.value());
+			sendit(buttonParam2.value());
+			_pcb->Publish("Event", "2", false);
 			break;
 		case BUTTON_3:
-			sendit(button3.value());
+			sendit(buttonParam3.value());
+			_pcb->Publish("Event", "3", false);
 			break;
 		case BUTTON_4:
-			sendit(button4.value());
+			sendit(buttonParam4.value());
+			_pcb->Publish("Event", "4", false);
 			break;
 	}
 }
