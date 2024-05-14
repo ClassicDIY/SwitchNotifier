@@ -1,2 +1,2 @@
-# EmailAlert
- Simple email notifier when digitalIO changes
+# Switch Notifier
+ Simple email/mqtt notifier when digitalIO changes
