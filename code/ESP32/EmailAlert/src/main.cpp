@@ -4,12 +4,12 @@
 #include "Log.h"
 #include "Defines.h"
 #include "IOT.h"
-#include "Emailer.h"
+#include "Notifier.h"
 
-using namespace EmailAlert;
+using namespace SwitchNotifier;
 
-EmailAlert::IOT _iot = EmailAlert::IOT();
-EmailAlert::Emailer _emailer = EmailAlert::Emailer();
+SwitchNotifier::IOT _iot = SwitchNotifier::IOT();
+SwitchNotifier::Notifier _notifier = SwitchNotifier::Notifier();
 hw_timer_t *_watchdogTimer = NULL;
 
 unsigned long _lastPublishTimeStamp = 0;
@@ -77,8 +77,8 @@ void setup()
 	Serial.begin(115200);
 	while (!Serial) {}
 	logd("Booting");
-	_emailer.setup(&_iot);
-	_iot.Init(&_emailer, tmp);
+	_notifier.setup(&_iot);
+	_iot.Init(&_notifier, tmp);
 	
 	init_watchdog();
 	_lastPublishTimeStamp = millis() + WAKE_PUBLISH_RATE;
@@ -95,7 +95,7 @@ void setup()
 
 void monitorButton(Button& button) {
 	if (button.pressed) {
-		_emailer.notify(button.PIN);
+		_notifier.notify(button.PIN);
 		button.pressed = false;
 	}
 }

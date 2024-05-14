@@ -14,7 +14,7 @@
 #include "IOTCallbackInterface.h"
 #include "MQTTCallbackInterface.h"
 
-namespace EmailAlert
+namespace SwitchNotifier
 {
 class IOT : public IOTServiceInterface
 {
@@ -41,6 +41,6 @@ private:
 };
 
 
-} // namespace EmailAlert
+} // namespace SwitchNotifier
 
-extern EmailAlert::IOT _iot;
+extern SwitchNotifier::IOT _iot;

@@ -8,16 +8,16 @@
 #include "IOTServiceInterface.h"
 #include "IOTCallbackInterface.h"
 
-namespace EmailAlert
+namespace SwitchNotifier
 {
 
-class Emailer : public IOTCallbackInterface
+class Notifier : public IOTCallbackInterface
 {
  public:
- 	Emailer();
-	~Emailer();
+ 	Notifier();
+	~Notifier();
     void setup(IOTServiceInterface* pcb);
-    void notify(uint8_t PIN);
+    void notify(uint8_t pin);
 
     //IOTCallbackInterface 
     String getRootHTML() ;
@@ -30,4 +30,4 @@ class Emailer : public IOTCallbackInterface
     IOTServiceInterface* _pcb;
 };
 
-} // namespace EmailAlert
+} // namespace SwitchNotifier

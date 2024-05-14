@@ -1,10 +1,10 @@
 #include <WiFi.h>
 #include <ESP_Mail_Client.h>
 #include "InlineFunctions.h"
-#include "Emailer.h"
+#include "Notifier.h"
 #include "Log.h"
 
-namespace EmailAlert
+namespace SwitchNotifier
 {
 static const char smtpPorts[][CONFIG_LEN] = { "25", "465", "587", "2525" };
 iotwebconf::ParameterGroup SMTP_group = iotwebconf::ParameterGroup("Email", "SMTP");
@@ -27,17 +27,17 @@ void smtpCallback(SMTP_Status status)
     logi("%s", status.info());
 }
 
-Emailer::Emailer()
+Notifier::Notifier()
 {
     _smtp = new SMTPSession();
 }
 
-Emailer::~Emailer()
+Notifier::~Notifier()
 {
     delete _smtp;
 }
 
-String Emailer::getRootHTML() {
+String Notifier::getRootHTML() {
 	String s;
 	s += "<ul>";
 	s += "<li>SMTP server: ";
@@ -67,11 +67,11 @@ String Emailer::getRootHTML() {
 	return s;
 }
 
-iotwebconf::ParameterGroup* Emailer::parameterGroup() {
+iotwebconf::ParameterGroup* Notifier::parameterGroup() {
 	return &SMTP_group;
 }
 
-bool Emailer::validate(iotwebconf::WebRequestWrapper* webRequestWrapper) {
+bool Notifier::validate(iotwebconf::WebRequestWrapper* webRequestWrapper) {
 	if ( requiredParam(webRequestWrapper, smtpServerParam) == false) return false;
 	if ( requiredParam(webRequestWrapper, smtpPortParam) == false) return false;
 	if ( requiredParam(webRequestWrapper, senderEmailParam) == false) return false;
@@ -85,7 +85,7 @@ bool Emailer::validate(iotwebconf::WebRequestWrapper* webRequestWrapper) {
 	return true;
 }
 
-void Emailer::setup(IOTServiceInterface* pcb){
+void Notifier::setup(IOTServiceInterface* pcb){
     logd("setup");
 	_pcb = pcb;
     _smtp->callback(smtpCallback);
@@ -102,7 +102,7 @@ void Emailer::setup(IOTServiceInterface* pcb){
 	EMAIL_group.addItem(&button4);
 	SMTP_group.addItem(&EMAIL_group);
 }
-void Emailer::notify(uint8_t pin){
+void Notifier::notify(uint8_t pin){
 	logi("Button %d has been pressed\n", pin);
 	switch (pin){
 		case BUTTON_1:
@@ -120,7 +120,7 @@ void Emailer::notify(uint8_t pin){
 	}
 }
 
-void Emailer::sendit(const char * content){
+void Notifier::sendit(const char * content){
 	logd("SMTP: %s:%s From:%s PW: %s To: (%s)%s", smtpServerParam.value(), smtpPortParam.value(), senderEmailParam.value(), senderPasswordParam.value(), recipientNameParam.value(), recipientEmailParam.value());
 	ESP_Mail_Session session;
 	session.server.host_name = smtpServerParam.value();
@@ -140,7 +140,7 @@ void Emailer::sendit(const char * content){
 	//Send HTML message
 	String htmlMsg = "<div style=\"color:#000000;\"><h1>";
     htmlMsg.concat(content);
-    htmlMsg.concat("</h1><p> Mail Generated from EmailAlert</p></div>");
+    htmlMsg.concat("</h1><p> Mail Generated from SwitchNotifier</p></div>");
 	message.html.content = htmlMsg.c_str();
 	message.text.charSet = "us-ascii";
 	message.html.transfer_encoding = Content_Transfer_Encoding::enc_7bit;
@@ -168,4 +168,4 @@ void Emailer::sendit(const char * content){
 		loge("SMTP Error, Status Code: %d, Error Code: %d, Reason: %s", _smtp->statusCode(), _smtp->errorCode(), _smtp->errorReason());
 	}
 
-} // namespace EmailAlert
+} // namespace SwitchNotifier

@@ -3,7 +3,7 @@
 #include <IotWebConfTParameter.h>
 #include "InlineFunctions.h"
 
-namespace EmailAlert
+namespace SwitchNotifier
 {
 bool _NTPConfigured = false;
 bool _needReset = false;
@@ -410,4 +410,4 @@ const char* IOT::getDeviceName() {
 	return deviceNameParam.value();
 }
 
-} // namespace EmailAlert
+} // namespace SwitchNotifier
