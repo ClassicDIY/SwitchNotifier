@@ -18,17 +18,27 @@ char _willTopic[MQTT_TOPIC_LEN];
 char _rootTopicPrefix[MQTT_TOPIC_LEN];
 
 iotwebconf::OptionalParameterGroup  MQTT_group = iotwebconf::OptionalParameterGroup ("MQTT", "MQTT", false);
-iotwebconf::TextTParameter<CONFIG_LEN> deviceNameParam = iotwebconf::Builder<iotwebconf::TextTParameter<CONFIG_LEN>>("deviceName").label("Device Name").defaultValue("EA1").build();
 iotwebconf::TextTParameter<CONFIG_LEN> mqttServerParam = iotwebconf::Builder<iotwebconf::TextTParameter<CONFIG_LEN>>("mqttServer").label("MQTT server").defaultValue("").build();
 iotwebconf::IntTParameter<uint16_t> mqttPortParam = iotwebconf::Builder<iotwebconf::IntTParameter<uint16_t>>("mqttSPort").label("MQTT port").defaultValue(1883).min(0).max(65535).build();
 iotwebconf::TextTParameter<CONFIG_LEN> mqttUserNameParam = iotwebconf::Builder<iotwebconf::TextTParameter<CONFIG_LEN>>("mqttUser").label("MQTT user").defaultValue("").build();
-iotwebconf::PasswordTParameter<CONFIG_LEN> mqttUserPasswordParam = iotwebconf::Builder<iotwebconf::PasswordTParameter<CONFIG_LEN>>("mqttPassword").label("MQTT password").defaultValue("").build();
+iotwebconf::TextTParameter<STR_LEN> mqttUserPasswordParam = iotwebconf::Builder<iotwebconf::TextTParameter<STR_LEN>>("mqttPassword").label("MQTT password").defaultValue("").build();
+iotwebconf::CheckboxTParameter setWillParam = iotwebconf::Builder<iotwebconf::CheckboxTParameter>("setWill").label("Set Will").defaultValue(true).build();
+iotwebconf::TextTParameter<STR_LEN> rootTopicParam = iotwebconf::Builder<iotwebconf::TextTParameter<STR_LEN>>("rootTopic").label("Root topic prefix").defaultValue(TAG).build();
+iotwebconf::TextTParameter<CONFIG_LEN> statSubtopicParam = iotwebconf::Builder<iotwebconf::TextTParameter<CONFIG_LEN>>("statSubtopicParam").label("Status subtopic").defaultValue("stat").build();
+iotwebconf::TextTParameter<CONFIG_LEN> cmdSubtopicParam = iotwebconf::Builder<iotwebconf::TextTParameter<CONFIG_LEN>>("cmdSubtopicParam").label("Command subtopic").defaultValue("cmd").build();
+iotwebconf::TextTParameter<CONFIG_LEN> teleSubtopicParam = iotwebconf::Builder<iotwebconf::TextTParameter<CONFIG_LEN>>("teleSubtopicParam").label("Telemetery subtopic").defaultValue("tele").build();
 
 iotwebconf::OptionalGroupHtmlFormatProvider optionalGroupHtmlFormatProvider;
 
 void onMqttConnect(bool sessionPresent) {
 	logd("Connected to MQTT. Session present: %d", sessionPresent);
 	char buf[MQTT_TOPIC_LEN];
+	int len = strlen(cmdSubtopicParam.value());
+	if (len > 0){
+		sprintf(buf, "%s/%s/#", _rootTopicPrefix, cmdSubtopicParam.value());
+	} else {
+		sprintf(buf, "%s/#", _rootTopicPrefix);
+	}
 	sprintf(buf, "%s/cmnd/#", _rootTopicPrefix);
 	_mqttClient.subscribe(buf, 0);
 	_mqttClient.publish(_willTopic, 0, true, "Online", 6);
@@ -49,14 +59,16 @@ void connectToMqtt() {
 	{
 		if (MQTT_group.isActive()) { // mqtt configured?
 			logi("Connecting to MQTT...");
-			int len = strlen(_iotWebConf.getThingName());
-			strncpy(_rootTopicPrefix, _iotWebConf.getThingName(), len);
-			if (_rootTopicPrefix[len - 1] != '/') {
-				strcat(_rootTopicPrefix, "/");
+			int len = strlen(rootTopicParam.value());
+			strncpy(_rootTopicPrefix, rootTopicParam.value(), len);
+			if (strlen(teleSubtopicParam.value()) > 0){
+				sprintf(_willTopic, "%s/%s", _rootTopicPrefix, teleSubtopicParam.value());
+			} else {
+				sprintf(_willTopic, "%s", _rootTopicPrefix);
 			}
-			strcat(_rootTopicPrefix, deviceNameParam.value());
-			sprintf(_willTopic, "%s/tele/LWT", _rootTopicPrefix);
-			_mqttClient.setWill(_willTopic, 0, true, "Offline");
+			if (setWillParam.value()){
+				_mqttClient.setWill(_willTopic, 0, true, "Offline");
+			}
 			_mqttClient.connect();
 			logd("rootTopicPrefix: %s", _rootTopicPrefix);
 		}
@@ -130,6 +142,7 @@ void onMqttMessage(char *topic, char *payload, AsyncMqttClientMessageProperties 
 	}
 }
 
+
 /**
  * Handle web requests to "/" path.
  */
@@ -150,21 +163,22 @@ void handleRoot() {
 	if (MQTT_group.isActive()) {
 		s += "MQTT:";
 		s += "<ul>";
-		s += "<li>Device Name: ";
-		s += deviceNameParam.value();
-		s += "<li>MQTT server: ";
-		s += mqttServerParam.value();
-		s += "<li>MQTT port: ";
-		s += mqttPortParam.value();
-		s += "<li>MQTT user: ";
-		s += mqttUserNameParam.value();
+		s += htmlConfigEntry<char *>(mqttServerParam.label, mqttServerParam.value());
+		s += htmlConfigEntry<uint16_t>(mqttPortParam.label, mqttPortParam.value());
+		s += htmlConfigEntry<char *>(mqttUserNameParam.label, mqttUserNameParam.value());
+		s += htmlConfigEntry<char *>(mqttUserPasswordParam.label, mqttUserPasswordParam.value());
+		s += htmlConfigEntry<const char *>(setWillParam.label, setWillParam.value() ? "Enabled" : "Disabled");
+		s += htmlConfigEntry<char *>(rootTopicParam.label, rootTopicParam.value());
+		s += htmlConfigEntry<char *>(statSubtopicParam.label, statSubtopicParam.value());
+		s += htmlConfigEntry<char *>(cmdSubtopicParam.label, cmdSubtopicParam.value());
+		s += htmlConfigEntry<char *>(teleSubtopicParam.label, teleSubtopicParam.value());
 		s += "</ul>";
 	} else {
 		s += "<ul>";
 		s += "<li>MQTT not setup.";
-		s += "</ul>";
+		s += "</li></ul>";
 	}
-	s += "Go to <a href='config'>configure page</a> to change values.";
+	s += "<p>Go to <a href='config'>configure page</a> to change values.</p>";
 	s += "</body></html>\n";
 	_webServer.send(200, "text/html", s);
 }
@@ -178,7 +192,7 @@ boolean formValidator(iotwebconf::WebRequestWrapper* webRequestWrapper) {
 	if (_iot.IOTCB()->validate(webRequestWrapper) == false) return false;
 	if (MQTT_group.isActive()) {
 		if ( requiredParam(webRequestWrapper, mqttServerParam) == false) return false;
-		if ( requiredParam(webRequestWrapper, deviceNameParam) == false) return false;
+		if ( requiredParam(webRequestWrapper, rootTopicParam) == false) return false;
 		if ( requiredParam(webRequestWrapper, mqttPortParam) == false) return false;
 	}
 	return true;
@@ -191,12 +205,16 @@ void IOT::Init(IOTCallbackInterface* iotCB, MQTTCallbackInterface* cmdCB) {
 	_iotWebConf.setStatusPin(WIFI_STATUS_PIN);
 	_iotWebConf.setConfigPin(WIFI_AP_PIN);
 	// setup EEPROM parameters
-
-   	MQTT_group.addItem(&deviceNameParam);
+   	
 	MQTT_group.addItem(&mqttServerParam);
 	MQTT_group.addItem(&mqttPortParam);
    	MQTT_group.addItem(&mqttUserNameParam);
 	MQTT_group.addItem(&mqttUserPasswordParam);
+	MQTT_group.addItem(&setWillParam);
+	MQTT_group.addItem(&rootTopicParam);
+	MQTT_group.addItem(&statSubtopicParam);
+	MQTT_group.addItem(&cmdSubtopicParam);
+	MQTT_group.addItem(&teleSubtopicParam);
 	
 	_iotWebConf.addParameterGroup(_iotCB->parameterGroup());
 	_iotWebConf.setHtmlFormatProvider(&optionalGroupHtmlFormatProvider);
@@ -233,7 +251,7 @@ void IOT::Init(IOTCallbackInterface* iotCB, MQTTCallbackInterface* cmdCB) {
 		// recipientEmailParam.applyDefaultValue();
 		// recipientNameParam.applyDefaultValue();
 		MQTT_group.setActive(false);
-		deviceNameParam.applyDefaultValue();
+		rootTopicParam.applyDefaultValue();
 		mqttServerParam.applyDefaultValue();
 		mqttPortParam.applyDefaultValue();
 		mqttUserNameParam.applyDefaultValue();
@@ -356,8 +374,20 @@ bool IOT::ProcessCmnd(char *payload, size_t len) {
 void IOT::Publish(const char *subtopic, const char *value, boolean retained) {
 	if (_mqttClient.connected()) {
 		char buf[MQTT_TOPIC_LEN];
-		sprintf(buf, "%s/stat/%s", _rootTopicPrefix, subtopic);
+		int len = strlen(statSubtopicParam.value());
+		if (len > 0){
+			sprintf(buf, "%s/%s", _rootTopicPrefix, statSubtopicParam.value());
+		} else {
+			sprintf(buf, "%s", _rootTopicPrefix);
+		}
+		if (strlen(subtopic) > 0) {
+			strcat(buf, "/");
+			strcat(buf, subtopic);
+		}
+		logd("Publishing topic: %s payload: %s", buf, value);
 		_mqttClient.publish(buf, 0, retained, value);
+	} else {
+		logw("MQTT client is not connected, unable to publish");
 	}
 }
 
@@ -387,7 +417,7 @@ const char* IOT::getThingName() {
 }
 
 const char* IOT::getDeviceName() {
-	return deviceNameParam.value();
+	return rootTopicParam.value();
 }
 
 } // namespace SwitchNotifier

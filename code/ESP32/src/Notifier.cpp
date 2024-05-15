@@ -13,7 +13,7 @@ iotwebconf::TextTParameter<CONFIG_LEN> smtpServerParam = iotwebconf::Builder<iot
 iotwebconf::SelectTParameter<CONFIG_LEN> smtpPortParam = iotwebconf::Builder<iotwebconf::SelectTParameter<CONFIG_LEN>>("smtpPort").label("SMTP port").
 	optionValues((const char*)smtpPorts).optionNames((const char*)smtpPorts).optionCount(sizeof(smtpPorts) / CONFIG_LEN).nameLength(CONFIG_LEN).defaultValue("465").build();
 iotwebconf::TextTParameter<STR_LEN> senderEmailParam = iotwebconf::Builder<iotwebconf::TextTParameter<STR_LEN>>("senderEmail").label("Sender Email").defaultValue("").build();
-iotwebconf::PasswordTParameter<STR_LEN> senderPasswordParam = iotwebconf::Builder<iotwebconf::PasswordTParameter<STR_LEN>>("senderPassword").label("Sender password").defaultValue("").build();
+iotwebconf::TextTParameter<STR_LEN> senderPasswordParam = iotwebconf::Builder<iotwebconf::TextTParameter<STR_LEN>>("senderPassword").label("Sender password").defaultValue("").build();
 iotwebconf::TextTParameter<STR_LEN> recipientEmailParam = iotwebconf::Builder<iotwebconf::TextTParameter<STR_LEN>>("recipientEmail").label("Recipient Email").defaultValue("").build();
 iotwebconf::TextTParameter<STR_LEN> recipientNameParam = iotwebconf::Builder<iotwebconf::TextTParameter<STR_LEN>>("recipientName").label("Recipient Name").defaultValue("").build();
 
@@ -22,7 +22,6 @@ iotwebconf::TextTParameter<STR_LEN> buttonParam1 = iotwebconf::Builder<iotwebcon
 iotwebconf::TextTParameter<STR_LEN> buttonParam2 = iotwebconf::Builder<iotwebconf::TextTParameter<STR_LEN>>("buttonParam2").label("Email text for button 2").defaultValue("Button 1 has been pressed").build();
 iotwebconf::TextTParameter<STR_LEN> buttonParam3 = iotwebconf::Builder<iotwebconf::TextTParameter<STR_LEN>>("buttonParam3").label("Email text for button 3").defaultValue("Button 1 has been pressed").build();
 iotwebconf::TextTParameter<STR_LEN> buttonParam4 = iotwebconf::Builder<iotwebconf::TextTParameter<STR_LEN>>("buttonParam4").label("Email text for button 4").defaultValue("Button 1 has been pressed").build();
-
 
 Button button1 = {BUTTON_1, false};
 Button button2 = {BUTTON_2, false};
@@ -61,31 +60,18 @@ Notifier::~Notifier()
 String Notifier::getRootHTML() {
 	String s;
 	s += "Email:";
-	s += "<ul>";
-	s += "<li>SMTP server: ";
-	s += smtpServerParam.value();
-	s += "<li>SMTP port: ";
-	s += smtpPortParam.value();
-	s += "<li>Sender Email: ";
-	s += senderEmailParam.value();
-	s += "<li>Sender password: ";
-	s += (strlen(senderPasswordParam.value()) > 0) ? "********" : "not set";
-	s += "<li>Recipient Email: ";
-	s += recipientEmailParam.value();
-	s += "<li>Recipient Name: ";
-	s += recipientNameParam.value();
-	s += "</ul>";
-	s += "Messages:";
-	s += "<ul>";
-	s += "<li>Message 1: ";
-	s += buttonParam1.value();
-	s += "<li>Message 2: ";
-	s += buttonParam2.value();
-	s += "<li>Message 3: ";
-	s += buttonParam3.value();
-	s += "<li>Message 4: ";
-	s += buttonParam4.value();
-	s += "</ul>";
+		s += "<ul>";
+		s += htmlConfigEntry<char *>(smtpServerParam.label, smtpServerParam.value());
+		s += htmlConfigEntry<char *>(smtpPortParam.label, smtpPortParam.value());
+		s += htmlConfigEntry<char *>(senderEmailParam.label, senderEmailParam.value());
+		s += htmlConfigEntry<char *>(senderPasswordParam.label, senderPasswordParam.value());
+		s += htmlConfigEntry<char *>(recipientEmailParam.label, recipientEmailParam.value());
+		s += htmlConfigEntry<char *>(recipientNameParam.label, recipientNameParam.value());
+		s += htmlConfigEntry<char *>(buttonParam1.label, buttonParam1.value());
+		s += htmlConfigEntry<char *>(buttonParam2.label, buttonParam2.value());
+		s += htmlConfigEntry<char *>(buttonParam3.label, buttonParam3.value());
+		s += htmlConfigEntry<char *>(buttonParam4.label, buttonParam4.value());
+		s += "</ul>";;
 	return s;
 }
 
@@ -97,12 +83,7 @@ bool Notifier::validate(iotwebconf::WebRequestWrapper* webRequestWrapper) {
 	if ( requiredParam(webRequestWrapper, smtpServerParam) == false) return false;
 	if ( requiredParam(webRequestWrapper, smtpPortParam) == false) return false;
 	if ( requiredParam(webRequestWrapper, senderEmailParam) == false) return false;
-	if (strlen(senderPasswordParam.value()) == 0) {
-		if ( requiredParam(webRequestWrapper, senderPasswordParam) == false) return false;
-	} else {
-		webRequestWrapper->arg(senderPasswordParam.getId()) = "***************";
-	}
-	
+	if ( requiredParam(webRequestWrapper, senderPasswordParam) == false) return false;
 	if ( requiredParam(webRequestWrapper, recipientEmailParam) == false) return false;
 	return true;
 }
@@ -151,26 +132,27 @@ void Notifier::notify(uint8_t pin){
 	logi("Button %d has been pressed\n", pin);
 	JsonDocument doc;
 	doc["TimeStamp"] = getTime();
+	doc["GPIO_Pin"] = pin;
 	switch (pin){
 		case BUTTON_1:
 			sendit(buttonParam1.value());
 			doc["Message"] = buttonParam1.value();
-			_pcb->Publish("Switch_1", doc, false);
+			_pcb->Publish("", doc, false);
 			break;
 		case BUTTON_2:
 			sendit(buttonParam2.value());
 			doc["Message"] = buttonParam2.value();
-			_pcb->Publish("Switch_2", doc, false);
+			_pcb->Publish("", doc, false);
 			break;
 		case BUTTON_3:
 			sendit(buttonParam3.value());
 			doc["Message"] = buttonParam3.value();
-			_pcb->Publish("Switch_3",doc, false);
+			_pcb->Publish("",doc, false);
 			break;
 		case BUTTON_4:
 			sendit(buttonParam4.value());
 			doc["Message"] = buttonParam4.value();
-			_pcb->Publish("Switch_4", doc, false);
+			_pcb->Publish("", doc, false);
 			break;
 	}
 }
