@@ -18,10 +18,10 @@ iotwebconf::TextTParameter<STR_LEN> recipientEmailParam = iotwebconf::Builder<io
 iotwebconf::TextTParameter<STR_LEN> recipientNameParam = iotwebconf::Builder<iotwebconf::TextTParameter<STR_LEN>>("recipientName").label("Recipient Name").defaultValue("").build();
 
 iotwebconf::ParameterGroup Button_Group = iotwebconf::ParameterGroup("Button_Group", "Email messages");
-iotwebconf::TextTParameter<STR_LEN> buttonParam1 = iotwebconf::Builder<iotwebconf::TextTParameter<STR_LEN>>("buttonParam1").label("Email text for button 1").defaultValue("Button 1 has been pressed").build();
-iotwebconf::TextTParameter<STR_LEN> buttonParam2 = iotwebconf::Builder<iotwebconf::TextTParameter<STR_LEN>>("buttonParam2").label("Email text for button 2").defaultValue("Button 1 has been pressed").build();
-iotwebconf::TextTParameter<STR_LEN> buttonParam3 = iotwebconf::Builder<iotwebconf::TextTParameter<STR_LEN>>("buttonParam3").label("Email text for button 3").defaultValue("Button 1 has been pressed").build();
-iotwebconf::TextTParameter<STR_LEN> buttonParam4 = iotwebconf::Builder<iotwebconf::TextTParameter<STR_LEN>>("buttonParam4").label("Email text for button 4").defaultValue("Button 1 has been pressed").build();
+iotwebconf::TextTParameter<STR_LEN> buttonParam1 = iotwebconf::Builder<iotwebconf::TextTParameter<STR_LEN>>("buttonParam1").label("Email text for button 1").defaultValue("Switch 1 trigerred").build();
+iotwebconf::TextTParameter<STR_LEN> buttonParam2 = iotwebconf::Builder<iotwebconf::TextTParameter<STR_LEN>>("buttonParam2").label("Email text for button 2").defaultValue("Switch 2 trigerred").build();
+iotwebconf::TextTParameter<STR_LEN> buttonParam3 = iotwebconf::Builder<iotwebconf::TextTParameter<STR_LEN>>("buttonParam3").label("Email text for button 3").defaultValue("Switch 3 trigerred").build();
+iotwebconf::TextTParameter<STR_LEN> buttonParam4 = iotwebconf::Builder<iotwebconf::TextTParameter<STR_LEN>>("buttonParam4").label("Email text for button 4").defaultValue("Switch 4 trigerred").build();
 
 Button button1 = {BUTTON_1, false};
 Button button2 = {BUTTON_2, false};
@@ -121,6 +121,7 @@ void Notifier::monitorButton(Button& button) {
 		button.pressed = false;
 	}
 }
+
 void Notifier::run(){
 	monitorButton(button1);
 	monitorButton(button2);
@@ -128,7 +129,7 @@ void Notifier::run(){
 	monitorButton(button4);
 }
 
-void Notifier::notify(uint8_t pin){
+void Notifier::notify(uint8_t pin) {
 	logi("Button %d has been pressed\n", pin);
 	JsonDocument doc;
 	doc["TimeStamp"] = getTime();
@@ -157,7 +158,7 @@ void Notifier::notify(uint8_t pin){
 	}
 }
 
-void Notifier::sendit(const char * content){
+void Notifier::sendit(const char * content) {
 	logd("SMTP: %s:%s From:%s PW: %s To: (%s)%s", smtpServerParam.value(), smtpPortParam.value(), senderEmailParam.value(), senderPasswordParam.value(), recipientNameParam.value(), recipientEmailParam.value());
 	ESP_Mail_Session session;
 	session.server.host_name = smtpServerParam.value();
@@ -190,19 +191,19 @@ void Notifier::sendit(const char * content){
 		loge("SMTP not connected");
 		return;
 	}
-	if (!_smtp->isLoggedIn())
-	{
+	if (!_smtp->isLoggedIn()) {
 		logw("SMTP not yet logged in.");
 	}
-	else
-	{
-	if (_smtp->isAuthenticated())
-		logi("SMTP successfully logged in.");
-	else
-		logw("Connected with no Auth.");
+	else {
+		if (_smtp->isAuthenticated()) {
+			logi("SMTP successfully logged in.");
+		} else {
+			logw("Connected with no Auth.");
+		}
+		if (!MailClient.sendMail(_smtp, &message)) {
+			loge("SMTP Error, Status Code: %d, Error Code: %d, Reason: %s", _smtp->statusCode(), _smtp->errorCode(), _smtp->errorReason());
+		}
 	}
-	if (!MailClient.sendMail(_smtp, &message))
-		loge("SMTP Error, Status Code: %d, Error Code: %d, Reason: %s", _smtp->statusCode(), _smtp->errorCode(), _smtp->errorReason());
-	}
+}
 
 } // namespace SwitchNotifier
