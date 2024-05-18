@@ -16,6 +16,7 @@ iotwebconf::TextTParameter<STR_LEN> senderEmailParam = iotwebconf::Builder<iotwe
 iotwebconf::TextTParameter<STR_LEN> senderPasswordParam = iotwebconf::Builder<iotwebconf::TextTParameter<STR_LEN>>("senderPassword").label("Sender password").defaultValue("").build();
 iotwebconf::TextTParameter<STR_LEN> recipientEmailParam = iotwebconf::Builder<iotwebconf::TextTParameter<STR_LEN>>("recipientEmail").label("Recipient Email").defaultValue("").build();
 iotwebconf::TextTParameter<STR_LEN> recipientNameParam = iotwebconf::Builder<iotwebconf::TextTParameter<STR_LEN>>("recipientName").label("Recipient Name").defaultValue("").build();
+iotwebconf::TextTParameter<STR_LEN> subjectParam = iotwebconf::Builder<iotwebconf::TextTParameter<STR_LEN>>("subjectParam").label("Subject").defaultValue("Switch Notify Alert").build();
 
 iotwebconf::ParameterGroup Button_Group = iotwebconf::ParameterGroup("Button_Group", "Email messages");
 iotwebconf::TextTParameter<STR_LEN> buttonParam1 = iotwebconf::Builder<iotwebconf::TextTParameter<STR_LEN>>("buttonParam1").label("Email text for button 1").defaultValue("Switch 1 trigerred").build();
@@ -67,6 +68,7 @@ String Notifier::getRootHTML() {
 		s += htmlConfigEntry<char *>(senderPasswordParam.label, senderPasswordParam.value());
 		s += htmlConfigEntry<char *>(recipientEmailParam.label, recipientEmailParam.value());
 		s += htmlConfigEntry<char *>(recipientNameParam.label, recipientNameParam.value());
+		s += htmlConfigEntry<char *>(subjectParam.label, subjectParam.value());
 		s += htmlConfigEntry<char *>(buttonParam1.label, buttonParam1.value());
 		s += htmlConfigEntry<char *>(buttonParam2.label, buttonParam2.value());
 		s += htmlConfigEntry<char *>(buttonParam3.label, buttonParam3.value());
@@ -99,6 +101,7 @@ void Notifier::setup(IOTServiceInterface* pcb){
 	SMTP_group.addItem(&senderPasswordParam);
 	SMTP_group.addItem(&recipientEmailParam);
 	SMTP_group.addItem(&recipientNameParam);
+	SMTP_group.addItem(&subjectParam);
 	Button_Group.addItem(&buttonParam1);
 	Button_Group.addItem(&buttonParam2);
 	Button_Group.addItem(&buttonParam3);
@@ -171,7 +174,7 @@ void Notifier::sendit(const char * content) {
 	SMTP_Message message;
 	message.sender.name = "ESP 32";
 	message.sender.email = senderEmailParam.value();
-	message.subject = "ESP32 Testing Email";
+	message.subject = subjectParam.value();
 	message.addRecipient(recipientNameParam.value(), recipientEmailParam.value());
 	message.timestamp.tag = "#esp_mail_current_time";
 	message.timestamp.format = "%B %d, %Y %H:%M:%S";
