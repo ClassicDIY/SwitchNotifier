@@ -25,6 +25,7 @@ public:
     void Publish(const char* topic, float value, boolean retained = false);
     void Publish(const char* topic, JsonDocument& payload, boolean retained = false);
     void PublishTelemetery(bool online);
+    void setGSMClient(SMTPSession* smtpSession);
     u_int getUniqueId() { return _uniqueId;};
     const char* getThingName();
     const char* getDeviceName();

@@ -62,7 +62,8 @@
 			"streambuf": "cpp",
 			"thread": "cpp",
 			"typeinfo": "cpp",
-			"csignal": "cpp"
+			"csignal": "cpp",
+			"*.tpp": "cpp"
 		}
 	}
 }

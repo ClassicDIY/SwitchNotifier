@@ -5,6 +5,20 @@
 
 namespace SwitchNotifier
 {
+
+#if TINY_GSM_MODEM_SIM7600
+#define TINY_GSM_DEBUG Serial
+// See all AT commands, if wanted
+// #define DUMP_AT_COMMANDS
+#include <TinyGsmClient.h>
+// Set serial for AT commands (to the module)
+// Use Hardware Serial on Mega, Leonardo, Micro
+#define SerialAT Serial1
+
+TinyGsm gsm_modem(SerialAT);
+TinyGsmClient gsm_client(gsm_modem);
+#endif
+
 bool _NTPConfigured = false;
 bool _needReset = false;
 AsyncMqttClient _mqttClient;
@@ -203,9 +217,7 @@ void IOT::Init(IOTCallbackInterface* iotCB, MQTTCallbackInterface* cmdCB) {
 	_cmdCB = cmdCB;
 	pinMode(FACTORY_RESET_PIN, INPUT_PULLUP);
 	_iotWebConf.setStatusPin(WIFI_STATUS_PIN);
-	_iotWebConf.setConfigPin(WIFI_AP_PIN);
 	// setup EEPROM parameters
-   	
 	MQTT_group.addItem(&mqttServerParam);
 	MQTT_group.addItem(&mqttPortParam);
    	MQTT_group.addItem(&mqttUserNameParam);
@@ -215,7 +227,6 @@ void IOT::Init(IOTCallbackInterface* iotCB, MQTTCallbackInterface* cmdCB) {
 	MQTT_group.addItem(&statSubtopicParam);
 	MQTT_group.addItem(&cmdSubtopicParam);
 	MQTT_group.addItem(&teleSubtopicParam);
-	
 	_iotWebConf.addParameterGroup(_iotCB->parameterGroup());
 	_iotWebConf.setHtmlFormatProvider(&optionalGroupHtmlFormatProvider);
 	_iotWebConf.addParameterGroup(&MQTT_group);
@@ -261,7 +272,48 @@ void IOT::Init(IOTCallbackInterface* iotCB, MQTTCallbackInterface* cmdCB) {
 	else
 	{
 		logi("Valid configuration!");
-		_iotWebConf.skipApStartup(); // Set WIFI_AP_PIN to gnd to force AP mode
+		_iotWebConf.skipApStartup();
+		// _iotWebConf.goOffLine(); 
+		#if TINY_GSM_MODEM_SIM7600
+		logi("Setup GSM");
+		pinMode(MODEM_PWRKEY, OUTPUT);
+		digitalWrite(MODEM_PWRKEY, HIGH);
+		delay(1000); //Need delay
+		digitalWrite(MODEM_PWRKEY, LOW);
+		// MODEM_FLIGHT IO:25 Modulator flight mode control, need to enable modulator, this pin must be set to high
+		pinMode(MODEM_FLIGHT, OUTPUT);
+		digitalWrite(MODEM_FLIGHT, HIGH);
+		delay(3000);
+		SerialAT.begin(UART_BAUD, SERIAL_8N1, MODEM_RX, MODEM_TX);
+		logi("Initializing modem...");
+		uint retryCount = 3;
+		while (!gsm_modem.init())
+		{
+			logw("Failed to initialize modem, delaying 10s and retrying.");
+			light_sleep(10);
+			if (--retryCount == 0) {
+				logw("Giving up!");
+				return;
+			}
+		}
+		gsm_modem.setNetworkMode(2); //Automatic
+		logi("Waiting for network...");
+		retryCount = 3;
+		if (!gsm_modem.waitForNetwork(600000L)) {
+			logw("The module did not connect to the network even after waiting, delaying 10s and retrying.");
+			light_sleep(10);
+			if (--retryCount == 0) {
+				logw("Giving up!");
+				return;
+			}
+		}
+		if (gsm_modem.isNetworkConnected()) {
+			logi("Network connected");
+		}
+		String cop = gsm_modem.getOperator();
+		IPAddress local = gsm_modem.localIP();
+		logi("Operator: %s Local IP: %s", cop.c_str(), local.toString());
+		#endif
 		if (MQTT_group.isActive()) // skip if no mqtt configured
 		{
 			
@@ -303,14 +355,12 @@ void IOT::Init(IOTCallbackInterface* iotCB, MQTTCallbackInterface* cmdCB) {
 boolean IOT::Run() {
 	bool rVal = false;
 	_iotWebConf.doLoop();
-	if (_needReset)
-	{
+	if (_needReset)	{
 		logi("Configuration changed, Rebooting after 1 second.");
 		_iotWebConf.delay(1000);
 		ESP.restart();
 	}
-	if (WiFi.isConnected())
-	{
+	if (WiFi.isConnected()) {
 		if (_NTPConfigured == false) {
 			struct tm timeinfo;
 			if(!getLocalTime(&timeinfo)){
@@ -325,23 +375,21 @@ boolean IOT::Run() {
 			rVal = _NTPConfigured; // not using MQTT
 		}
 	}
-	else
-	{
+	else if (gsm_modem.isNetworkConnected()) {
+		return true;
+	}
+	else {
 		// set SSID/PW from flasher.exe app
-		if (Serial.peek() == '{')
-		{
+		if (Serial.peek() == '{') {
 			String s = Serial.readStringUntil('}');
 			s += "}";
 			JsonDocument doc;
 			DeserializationError err = deserializeJson(doc, s);
-			if (err)
-			{
+			if (err) {
 				loge("deserializeJson() failed: %s", err.c_str());
 			}
-			else
-			{
-				if (doc.containsKey("ssid") && doc.containsKey("password"))
-				{
+			else {
+				if (doc.containsKey("ssid") && doc.containsKey("password"))	{
 					iotwebconf::Parameter *p = _iotWebConf.getWifiSsidParameter();
 					strcpy(p->valueBuffer, doc["ssid"]);
 					logd("Setting ssid: %s", p->valueBuffer);
@@ -353,14 +401,12 @@ boolean IOT::Run() {
 					_iotWebConf.saveConfig();
 					esp_restart();
 				}
-				else
-				{
+				else {
 					logw("Received invalid json: %s", s.c_str());
 				}
 			}
 		}
-		else
-		{
+		else {
 			Serial.read(); // discard data
 		}
 	}
@@ -420,4 +466,9 @@ const char* IOT::getDeviceName() {
 	return rootTopicParam.value();
 }
 
+void IOT::setGSMClient(SMTPSession* smtpSession) {
+	if (!WiFi.isConnected()) {
+		smtpSession->setGSMClient(&gsm_client, &gsm_modem, "", "", "", "");
+	}
+}
 } // namespace SwitchNotifier

@@ -1,12 +1,12 @@
 #include <Arduino.h>
 #include <SPI.h>
-#include <ESP_Mail_Client.h>
 #include "Log.h"
 #include "Defines.h"
 #include "IOT.h"
 #include "Notifier.h"
 
 using namespace SwitchNotifier;
+
 
 SwitchNotifier::IOT _iot = SwitchNotifier::IOT();
 SwitchNotifier::Notifier _notifier = SwitchNotifier::Notifier();
@@ -47,6 +47,8 @@ void Wake()
 	_currentPublishRate = _wakePublishRate;
 	_lastPublishTimeStamp = 0;
 }
+
+
 
 void setup()
 {

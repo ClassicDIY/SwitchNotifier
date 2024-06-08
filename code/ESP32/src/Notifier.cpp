@@ -1,5 +1,4 @@
 #include <WiFi.h>
-#include <ESP_Mail_Client.h>
 #include "HelperFunctions.h"
 #include "Notifier.h"
 #include "Log.h"
@@ -163,7 +162,7 @@ void Notifier::notify(uint8_t pin) {
 
 void Notifier::sendit(const char * content) {
 	logd("SMTP: %s:%s From:%s PW: %s To: (%s)%s", smtpServerParam.value(), smtpPortParam.value(), senderEmailParam.value(), senderPasswordParam.value(), recipientNameParam.value(), recipientEmailParam.value());
-	ESP_Mail_Session session;
+	Session_Config session;
 	session.server.host_name = smtpServerParam.value();
 
 	session.server.port = atoi(smtpPortParam.value());
@@ -190,7 +189,8 @@ void Notifier::sendit(const char * content) {
 	message.text.content = textMsg.c_str();
 	message.text.charSet = "us-ascii";
 	message.text.transfer_encoding = Content_Transfer_Encoding::enc_7bit;*/
-	if (!_smtp->connect(&session)) {
+	_pcb->setGSMClient(_smtp);
+	if (!_smtp->connect(&session, true)) {
 		loge("SMTP not connected");
 		return;
 	}

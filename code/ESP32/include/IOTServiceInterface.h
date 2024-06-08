@@ -1,6 +1,7 @@
 #pragma once
 #include "Arduino.h"
 #include "ArduinoJson.h"
+#include <ESP_Mail_Client.h>
 
 class IOTServiceInterface
 {
@@ -13,5 +14,5 @@ public:
     virtual u_int getUniqueId() = 0;
     virtual const char* getThingName() = 0;
     virtual const char* getDeviceName() = 0;
-
+    virtual void setGSMClient(SMTPSession* smtpSession) = 0;
 };
