@@ -133,29 +133,18 @@ void Notifier::run(){
 
 void Notifier::notify(uint8_t pin) {
 	logi("Button %d has been pressed\n", pin);
-	JsonDocument doc;
-	doc["TimeStamp"] = getTime();
-	doc["GPIO_Pin"] = pin;
 	switch (pin){
 		case BUTTON_1:
 			sendit(buttonParam1.value());
-			doc["Message"] = buttonParam1.value();
-			_pcb->Publish("", doc, false);
 			break;
 		case BUTTON_2:
 			sendit(buttonParam2.value());
-			doc["Message"] = buttonParam2.value();
-			_pcb->Publish("", doc, false);
 			break;
 		case BUTTON_3:
 			sendit(buttonParam3.value());
-			doc["Message"] = buttonParam3.value();
-			_pcb->Publish("",doc, false);
 			break;
 		case BUTTON_4:
 			sendit(buttonParam4.value());
-			doc["Message"] = buttonParam4.value();
-			_pcb->Publish("", doc, false);
 			break;
 	}
 }
@@ -189,7 +178,9 @@ void Notifier::sendit(const char * content) {
 	message.text.content = textMsg.c_str();
 	message.text.charSet = "us-ascii";
 	message.text.transfer_encoding = Content_Transfer_Encoding::enc_7bit;*/
+	#if TINY_GSM_MODEM_SIM7600
 	_pcb->setGSMClient(_smtp);
+	#endif
 	if (!_smtp->connect(&session, true)) {
 		loge("SMTP not connected");
 		return;

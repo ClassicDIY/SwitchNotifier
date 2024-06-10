@@ -7,7 +7,6 @@
 
 using namespace SwitchNotifier;
 
-
 SwitchNotifier::IOT _iot = SwitchNotifier::IOT();
 SwitchNotifier::Notifier _notifier = SwitchNotifier::Notifier();
 hw_timer_t *_watchdogTimer = NULL;
@@ -48,16 +47,13 @@ void Wake()
 	_lastPublishTimeStamp = 0;
 }
 
-
-
 void setup()
 {
-	MQTTCallbackInterface* tmp;
 	Serial.begin(115200);
 	while (!Serial) {}
 	logd("Booting");
 	_notifier.setup(&_iot);
-	_iot.Init(&_notifier, tmp);
+	_iot.Init(&_notifier);
 	init_watchdog();
 	_lastPublishTimeStamp = millis() + WAKE_PUBLISH_RATE;
 	logd("Done setup");

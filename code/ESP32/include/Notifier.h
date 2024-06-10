@@ -4,8 +4,6 @@
 #include <IotWebConf.h>
 #include <IotWebConfTParameter.h>
 #include <ESP_Mail_Client.h>
-#include <LittleFS.h>
-#define ESP_MAIL_DEFAULT_FLASH_FS LittleFS
 #include "log.h"
 #include "Defines.h"
 #include "IOTServiceInterface.h"

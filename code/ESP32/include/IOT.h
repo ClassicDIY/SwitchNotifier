@@ -5,39 +5,32 @@
 #include <EEPROM.h>
 
 #include "Log.h"
-#include "AsyncMqttClient.h"
 #include <IotWebConf.h>
 #include <IotWebConfUsing.h>
 #include <IotWebConfESP32HTTPUpdateServer.h>
 #include "Defines.h"
 #include "IOTServiceInterface.h"
 #include "IOTCallbackInterface.h"
-#include "MQTTCallbackInterface.h"
+
 
 namespace SwitchNotifier
 {
 class IOT : public IOTServiceInterface
 {
 public:
-    void Init(IOTCallbackInterface* iotCB, MQTTCallbackInterface* cmdCB);
+    void Init(IOTCallbackInterface* iotCB);
     boolean Run();
-    void Publish(const char* subtopic, const char *value, boolean retained = false);
-    void Publish(const char* topic, float value, boolean retained = false);
-    void Publish(const char* topic, JsonDocument& payload, boolean retained = false);
-    void PublishTelemetery(bool online);
-    void setGSMClient(SMTPSession* smtpSession);
     u_int getUniqueId() { return _uniqueId;};
     const char* getThingName();
     const char* getDeviceName();
     IOTCallbackInterface* IOTCB() { return _iotCB;}
-
     bool ProcessCmnd(char *payload, size_t len);
+    #if TINY_GSM_MODEM_SIM7600
+    void setGSMClient(SMTPSession* smtpSession);
+    #endif
 
 private:
-    MQTTCallbackInterface* _cmdCB;
     IOTCallbackInterface* _iotCB;
-    bool _MQTTConfigured = false;
-    bool _lastTelemetery = true; 
     u_int _uniqueId = 0; // unique id from mac address NIC segment
 };
 
