@@ -1,5 +1,5 @@
 # ESP32 SIM7600G Switch Notifier 
-# Simple email/mqtt notifier when a digitalIO changes
+# Simple email notifier when a digitalIO changes
 
 <em style="color:red;"> Work in progress!!! GSM comming soon</em>
 
