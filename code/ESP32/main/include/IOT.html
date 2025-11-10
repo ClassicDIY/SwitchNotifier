@@ -1,0 +1,182 @@
+const char* redirect_html PROGMEM = R"rawliteral(
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>{n}</title>
+        <script>
+            window.onload = function() {
+                window.location.href = "http://{ip}";
+            };
+        </script>
+    </head>
+    <body>
+        <h1>Redirecting to Home Page...</h1>
+    </body>
+    </html>
+)rawliteral";
+
+const char update_html[] PROGMEM = R"rawliteral(
+    <!DOCTYPE html><html lang=\"en\"><head><meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <title>Firmware Update</title>
+    </head><body>
+    <h1>HydroFloat Firmware Update</h1>
+    <h1>ESP32 OTA Update</h1>
+    <form method='POST' action='/doupdate' enctype='multipart/form-data'>
+    <input type='file' name='firmware'>
+    </form>
+    <div>
+        Copyright (c) 2025. ClassicDIY</br>
+        The source code is hosted and available on Github at <a href="https://github.com/classicdiy/SwitchNotifier" target="_blank">https://github.com/classicdiy/SwitchNotifier</a>.</br>
+        The software is provided on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</br>
+    </div>
+    </body></html>
+)rawliteral";
+
+const char network_config_top[] PROGMEM = R"rawliteral(
+    <!DOCTYPE html><html lang=\"en\"><head><meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <title>{n}</title>
+    <script>
+    
+        function dhcpCheck(checkbox) {
+            const fieldset = document.getElementById("dhcp");
+            fieldset.disabled = checkbox.checked;
+        }
+        function showFields() {
+            // Hide all fields
+            document.querySelectorAll('#networkSelector-container > div').forEach(div => div.classList.add('hidden'));
+
+            // Get selected value
+            var selectedValue = document.getElementById('networkSelector').value;
+            if (selectedValue) {
+                document.getElementById(selectedValue + '-fields').classList.remove('hidden');
+            }
+        }
+
+        window.onload = function() {
+		      showFields();
+          dhcpCheck(document.getElementById("dhcpCheckbox"));
+		}
+        function validateInputs() {
+            {validateInputs}
+            return true;
+        }
+    </script>
+    {style}
+    </head>
+    <body>
+      <div id="config">
+      <div>
+          <h2>{n}</h2>
+          <div class="ver">Firmware version '{v}'</div>
+          <hr>
+      </div>
+      <div class="container">
+      <div class="form-group">
+)rawliteral";
+
+const char network_config_fields[] PROGMEM = R"rawliteral(
+<form onsubmit="return validateInputs()" action='/submit' method='post'>
+<fieldset id="network" class="fs">
+  <legend>Network</legend>
+
+  <div class="form-grid">
+    <label for="AP_SSID">AP SSID/Device Name</label>
+    <input type="text" id="AP_SSID" name="AP_SSID" value="{AP_SSID}" required maxlength="32">
+  </div>
+
+  <div class="form-grid">
+    <label for="AP_Pw">AP/admin Password</label>
+    <input type="text" id="AP_Pw" name="AP_Pw" value="{AP_Pw}" minlength="8" required maxlength="32">
+  </div>
+
+  <div class="form-grid">
+    <label for="networkSelector">Network Mode</label>
+    <select id="networkSelector" name="networkSelector" onchange="showFields()">
+      <option value="wifi" {WIFI}>WiFi</option>
+      <option value="ethernet" {ETH}>Ethernet</option>
+      <option value="modem" {4G}>4G Modem</option>
+    </select>
+  </div>
+
+  <div id="networkSelector-container">
+    <div id="wifi-fields" class="hidden">
+      <div class="form-grid">
+        <label for="SSID">WiFi SSID</label>
+        <input type="text" id="SSID" name="SSID" value="{SSID}" maxlength="32">
+      </div>
+      <div class="form-grid">
+        <label for="WiFi_Pw">WiFi Password</label>
+        <input type="text" id="WiFi_Pw" name="WiFi_Pw" value="{WiFi_Pw}" maxlength="32">
+      </div>
+    </div>
+
+    <div id="ethernet-fields" class="hidden">
+      <fieldset id="dhcp" class="fs">
+        <legend>
+          <label><input type="checkbox" id="dhcpCheckbox" name="dhcpCheckbox" onclick="dhcpCheck(this)" {dhcpChecked}> Use DHCP</label>
+        </legend>
+        <div class="form-grid">
+          <label for="ETH_SIP">Static IP</label>
+          <input type="text" id="ETH_SIP" name="ETH_SIP" value="{ETH_SIP}" maxlength="32">
+        </div>
+        <div class="form-grid">
+          <label for="ETH_SM">Subnet Mask</label>
+          <input type="text" id="ETH_SM" name="ETH_SM" value="{ETH_SM}" maxlength="32">
+        </div>
+        <div class="form-grid">
+          <label for="ETH_GW">Gateway</label>
+          <input type="text" id="ETH_GW" name="ETH_GW" value="{ETH_GW}" maxlength="32">
+        </div>
+      </fieldset>
+    </div>
+
+    <div id="modem-fields" class="hidden">
+      <div class="form-grid">
+        <label for="APN">APN</label>
+        <input type="text" id="APN" name="APN" value="{APN}" maxlength="32">
+      </div>
+      <div class="form-grid">
+        <label for="SIM_USERNAME">Username</label>
+        <input type="text" id="SIM_USERNAME" name="SIM_USERNAME" value="{SIM_USERNAME}" maxlength="32">
+      </div>
+      <div class="form-grid">
+        <label for="SIM_PASSWORD">Password</label>
+        <input type="text" id="SIM_PASSWORD" name="SIM_PASSWORD" value="{SIM_PASSWORD}" maxlength="32">
+      </div>
+      <div class="form-grid">
+        <label for="SIM_PIN">PIN</label>
+        <input type="text" id="SIM_PIN" name="SIM_PIN" value="{SIM_PIN}" maxlength="32">
+      </div>
+    </div>
+  </div>
+</fieldset>
+
+
+)rawliteral";
+
+const char network_config_apply_button[] PROGMEM = R"rawliteral(
+    <button type="submit" >Apply</button>
+    </form>
+)rawliteral";
+
+const char network_config_links[] PROGMEM = R"rawliteral(
+        <div class="link-row">
+          <a href='/'>Home page</a>
+          <a href='/update'>Firmware update</a>
+          <a href='/reboot'>Reboot</a>
+        </div>
+    </div></div>
+    </body></html>
+)rawliteral";
+
+const char network_config_links_no_ota[] PROGMEM = R"rawliteral(
+        <div class="link-row">
+          <a href='/'>Home page</a> 
+          <a href='/reboot'>Reboot</a> 
+        </div>
+    </div></div>
+    </body></html>
+)rawliteral";
+

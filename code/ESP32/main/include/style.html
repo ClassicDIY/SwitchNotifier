@@ -1,0 +1,133 @@
+const char style[] PROGMEM = R"rawliteral(
+    <style>
+        body {
+            font-family: apercu-pro, -apple-system, system-ui, BlinkMacSystemFont, "Helvetica Neue", sans-serif;
+            font-weight: 550;
+            text-align: center;
+        }
+        .container {
+            display: flex;
+            justify-content: center; 
+            align-items: center; 
+            height: 100vh; 
+        }
+        .form-grid {
+            display: grid;
+            grid-template-columns: 200px 1fr;
+            gap: 6px 12px;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+        .inline-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 18px;
+        }
+        .inline-group div {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+        }
+        .inline-group label {
+            font-size: 0.85em;
+            margin-bottom: 2px;
+        }
+        .form-group {
+            margin-bottom: 10px;
+            margin-top: 10px;
+            display: flex;
+            flex-direction: column;
+            height: 100%; 
+			width:100%;
+        }
+        .home-group {
+            margin-bottom: 10px;
+            margin-top: 10px;
+            display: flex;
+            flex-direction: column;
+            height: 100%; 
+			width:300px;
+        }
+        .fs {
+            display: inline-block;
+            border-radius:0.3rem;
+            margin: 0px;
+            width:95%; 
+            color: #000080;
+        }
+        .box {
+            width: 120px;
+            height: 25px;
+            margin: 5px;
+			background-color:grey;
+			display: inline-flex; /* Changed to inline-flex to allow the use of Flexbox */
+			align-items: center;  /* Vertically center the content */
+			justify-content: center; /* Horizontally center the content */
+			border: 1px solid #000; /* Added a border for better visibility */
+        }
+        .modbus-bridge-row {
+            display: grid;
+            grid-template-columns: 80px 40px 50px 60px 80px 60px 40px;
+            gap: 6px 6px;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .modbus-bridge-row label{
+            font-size: 0.9em;
+            text-align: right;
+        }
+        .desc {
+            color: #4207e4ff;
+            font-size: .8em;
+        }
+        .app-range-row {
+            display: grid;
+            grid-template-columns: 80px 50px 20px 60px 80px 50px 20px 60px;
+            gap: 6px 6px;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .app-range-row label {
+            font-size: 0.9em;
+            text-align: left;
+        }
+        button{
+            border:0;
+            border-radius:0.3rem;
+            background-color:#16A1E7;
+            color:#fff;
+            line-height:2.4rem;
+            font-size:1.2rem;
+            width:100%;
+            margin-top: 10px;
+            margin-bottom: 20px;
+		    } 
+        .hidden{display: none;}
+        .ver {
+            font-size: .6em;
+        }
+        #config {
+          width: 530px;
+          margin: 0 auto;
+          align: center;
+        }
+        #home {
+          width: 530px;
+          margin: 0 auto;
+          align: center;
+        }
+        .link-row {
+          display: flex;
+          justify-content: space-between;
+          padding: 10px;
+        }
+        .link-row a {
+          text-decoration: none;
+          font-weight: bold;
+          color: #0055aa;
+        }
+        .link-row a:hover {
+          text-decoration: underline;
+        }
+    </style>
+    )rawliteral";

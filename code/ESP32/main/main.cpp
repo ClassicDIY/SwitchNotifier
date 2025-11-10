@@ -1,20 +1,20 @@
 #include <Arduino.h>
 #include <SPI.h>
+#ifdef Has_OLED_Display
+#include <Adafruit_GFX.h> 
+#include <Adafruit_SSD1306.h>
+#endif
 #include "Log.h"
 #include "Defines.h"
-#include "IOT.h"
 #include "Notifier.h"
 
-using namespace SwitchNotifier;
+using namespace CLASSICDIY;
 
-SwitchNotifier::IOT _iot = SwitchNotifier::IOT();
-SwitchNotifier::Notifier _notifier = SwitchNotifier::Notifier();
+Notifier _notifier = Notifier();
 hw_timer_t *_watchdogTimer = NULL;
-
-unsigned long _lastPublishTimeStamp = 0;
-unsigned long _currentPublishRate = WAKE_PUBLISH_RATE; // rate currently being used
-unsigned long _wakePublishRate = WAKE_PUBLISH_RATE; // wake publish rate set by config or mqtt command
-boolean _stayAwake = false;
+#ifdef Has_OLED_Display
+Adafruit_SSD1306 oled_display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
+#endif
 
 void IRAM_ATTR resetModule()
 {
@@ -41,36 +41,19 @@ void feed_watchdog()
 	}
 }
 
-void Wake()
-{
-	_currentPublishRate = _wakePublishRate;
-	_lastPublishTimeStamp = 0;
-}
-
 void setup()
 {
 	Serial.begin(115200);
 	while (!Serial) {}
 	logd("Booting");
-	_notifier.setup(&_iot);
-	_iot.Init(&_notifier);
+	_notifier.setup();
 	init_watchdog();
-	_lastPublishTimeStamp = millis() + WAKE_PUBLISH_RATE;
 	logd("Done setup");
 }
 
 void loop()
 {
-	if (_iot.Run()) {
-		if (_lastPublishTimeStamp < millis())
-		{
-			feed_watchdog();
-			_notifier.run();
-			_lastPublishTimeStamp = millis() + _currentPublishRate;
-		}
-	}
-	else {
-		feed_watchdog(); // don't reset when not configured
-	}
+	_notifier.run();
+	feed_watchdog(); // don't reset when not configured
 }
 
