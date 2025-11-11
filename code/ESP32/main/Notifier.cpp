@@ -31,7 +31,8 @@ void Notifier::onSaveSetting(JsonDocument &doc) {
 	snmp["subject"] = _subject;
     JsonObject messages = doc["messages"].to<JsonObject>();
     for (int i = 0; i < NUM_BUTTONS; i++) {
-        String msg = "msg" + i;
+        String msg = "msg";
+        msg += String(i);
         messages[msg.c_str()] = _buttons[i].message;
     }
 }
@@ -47,8 +48,9 @@ void Notifier::onLoadSetting(JsonDocument &doc) {
 	_subject = snmp["subject"].isNull() ? "" : snmp["subject"].as<String>();
     JsonObject messages = doc["messages"].as<JsonObject>();
     for (int i = 0; i < NUM_BUTTONS; i++) {
-        String msg = "msg" + i;
-        _buttons[i].message = messages[msg].as<std::string>();
+        String msg = "msg";
+        msg += String(i);
+        _buttons[i].message = messages[msg.c_str()].as<std::string>();
     }
 }
 
