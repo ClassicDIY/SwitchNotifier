@@ -257,7 +257,7 @@ String textMsg = "How are you doing";
 message.text.content = textMsg.c_str();
 message.text.charSet = "us-ascii";
 message.text.transfer_encoding = Content_Transfer_Encoding::enc_7bit;*/
-#if TINY_GSM_MODEM_SIM7600
+#if HasLTE
     _iot.setGSMClient(_smtp);
 #endif
     if (!_smtp->connect(&session, true)) {

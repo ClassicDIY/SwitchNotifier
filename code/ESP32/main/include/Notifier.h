@@ -44,7 +44,11 @@ class Notifier : public IOTCallbackInterface {
     String _recipientEmail = "jane@gmail.com";
     String _recipientName = "tarzan";
     String _subject = "Switch Notifier";
+    #ifdef LILYGO_T_SIM7600G
+    Button _buttons[NUM_BUTTONS] = {Button(DI0), Button(DI1)};
+    #else
     Button _buttons[NUM_BUTTONS] = {Button(DI0), Button(DI1), Button(DI2), Button(DI3), Button(DI4), Button(DI5), Button(DI6), Button(DI7)};
+    #endif
 };
 
 } // namespace CLASSICDIY

@@ -93,6 +93,7 @@ void inline GPIO_Init()
 #define I2C_SCL GPIO_NUM_17
 
 //GSM Modem
+#define UART_BAUD 115200
 #define LTE_PWR_EN GPIO_NUM_21
 #define LTE_TXD GPIO_NUM_32
 #define LTE_RXD GPIO_NUM_33

@@ -25,7 +25,7 @@ class IOT : public IOTServiceInterface {
     std::string getThingName();
     NetworkState getNetworkState() { return _networkState; }
     void GoOnline();
-#if TINY_GSM_MODEM_SIM7600
+#if HasLTE
     void setGSMClient(SMTPSession *smtpSession);
 #endif
   private:

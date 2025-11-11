@@ -22,6 +22,20 @@ extern Adafruit_SSD1306 oled_display;
 #endif
 
 namespace CLASSICDIY {
+
+#if HasLTE
+#define TINY_GSM_DEBUG Serial
+// See all AT commands, if wanted
+// #define DUMP_AT_COMMANDS
+#include <TinyGsmClient.h>
+// Set serial for AT commands (to the module)
+// Use Hardware Serial on Mega, Leonardo, Micro
+#define SerialAT Serial1
+
+TinyGsm gsm_modem(SerialAT);
+TinyGsmClient gsm_client(gsm_modem);
+#endif
+
 TimerHandle_t mqttReconnectTimer;
 static DNSServer _dnsServer;
 static WebLog _webLog;
@@ -57,6 +71,51 @@ void IOT::Init(IOTCallbackInterface *iotCB, AsyncWebServer *pwebServer) {
     else {
         loadSettings();
     }
+
+#if TINY_GSM_MODEM_SIM7600
+    logi("Setup GSM");
+    pinMode(LTE_PWR_EN, OUTPUT);
+#ifdef MODEM_FLIGHT
+    // MODEM_FLIGHT IO:25 Modulator flight mode control, need to enable modulator, this pin must be set to high
+    pinMode(MODEM_FLIGHT, OUTPUT);
+    digitalWrite(MODEM_FLIGHT, HIGH);
+#endif
+    digitalWrite(LTE_PWR_EN, LOW);
+    delay(1000);
+    logd("Power on the modem");
+    digitalWrite(LTE_PWR_EN, HIGH);
+    delay(1000);
+    logd("Modem is powered up and ready");
+    SerialAT.begin(UART_BAUD, SERIAL_8N1, LTE_RXD, LTE_TXD);
+    logi("Initializing modem...");
+    uint retryCount = 3;
+    while (!gsm_modem.init()) {
+        logw("Failed to initialize modem, delaying 10s and retrying.");
+        light_sleep(5);
+        if (--retryCount == 0) {
+            logw("Giving up!");
+            return;
+        }
+    }
+    gsm_modem.setNetworkMode(2); // Automatic
+    logi("Waiting for network...");
+    retryCount = 3;
+    if (!gsm_modem.waitForNetwork(600000L)) {
+        logw("The module did not connect to the network even after waiting, delaying 10s and retrying.");
+        light_sleep(10);
+        if (--retryCount == 0) {
+            logw("Giving up!");
+            return;
+        }
+    }
+    if (gsm_modem.isNetworkConnected()) {
+        logi("Network connected");
+    }
+    String cop = gsm_modem.getOperator();
+    IPAddress local = gsm_modem.localIP();
+    logi("Operator: %s Local IP: %s", cop.c_str(), local.toString());
+#endif
+
     WiFi.onEvent([this](WiFiEvent_t event, WiFiEventInfo_t info) {
         String s;
         JsonDocument doc;
@@ -114,7 +173,7 @@ void IOT::Init(IOTCallbackInterface *iotCB, AsyncWebServer *pwebServer) {
     _pwebServer->onNotFound([this](AsyncWebServerRequest *request) { RedirectToHome(request); });
     basicAuth.setUsername("admin");
     basicAuth.setPassword(_AP_Password.c_str());
-    basicAuth.setAuthFailureMessage("Authentication failed");
+    basicAuth.setAuthFailureMessage("Authentication failed, try using incognito mode!");
     basicAuth.setAuthType(AsyncAuthType::AUTH_BASIC);
     basicAuth.generateHash();
     _pwebServer
@@ -646,12 +705,13 @@ std::string IOT::getThingName() {
     return s;
 }
 
-#if TINY_GSM_MODEM_SIM7600
+#if HasLTE
 void IOT::setGSMClient(SMTPSession *smtpSession) {
-    // if (useGSM.isChecked()) {
-    // 	smtpSession->setGSMClient(&gsm_client, &gsm_modem, pinGPRSParam.value(), apnGPRSParam.value(),
-    // userGPRSParam.value(), passGPRSParam.value());
-    // }
+    // logd("set GSM Client staticipeast.telus.com");
+    smtpSession->setGSMClient(&gsm_client, &gsm_modem, "", "staticipeast.telus.com", "", "");
+    if (gsm_modem.isNetworkConnected()) {
+        logi("GSM Network connected");
+    }
 }
 #endif
 
