@@ -32,7 +32,7 @@ void Notifier::onSaveSetting(JsonDocument &doc) {
     JsonObject messages = doc["messages"].to<JsonObject>();
     for (int i = 0; i < NUM_BUTTONS; i++) {
         String msg = "msg" + i;
-        messages[msg] = _buttons[i].message;
+        messages[msg.c_str()] = _buttons[i].message;
     }
 }
 

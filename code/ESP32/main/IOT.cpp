@@ -55,7 +55,6 @@ void IOT::Init(IOTCallbackInterface *iotCB, AsyncWebServer *pwebServer) {
     }
 #endif
     else {
-        logi("Loading configuration from EEPROM");
         loadSettings();
     }
     WiFi.onEvent([this](WiFiEvent_t event, WiFiEventInfo_t info) {
@@ -151,7 +150,7 @@ void IOT::Init(IOTCallbackInterface *iotCB, AsyncWebServer *pwebServer) {
 #ifdef HasOTA
                  page += network_config_links;
 #else 
-			page += network_config_links_no_ota;
+                page += network_config_links_no_ota;
 #endif
                  request->send(200, "text/html", page);
              })
@@ -211,8 +210,6 @@ void IOT::loadSettings() {
         jsonString += ch;
         _settingsChecksum += ch;
     }
-    logd("Settings JSON: ");
-    ets_printf("%s\r\n", jsonString.c_str());
     JsonDocument doc;
     DeserializationError error = deserializeJson(doc, jsonString);
     if (error) {
@@ -220,6 +217,7 @@ void IOT::loadSettings() {
         saveSettings(); // save default values
     } else {
         logd("JSON loaded from EEPROM: %d", jsonString.length());
+        printFormattedJson(doc);
         JsonObject iot = doc["iot"].as<JsonObject>();
         _AP_SSID = iot["AP_SSID"].isNull() ? TAG : iot["AP_SSID"].as<String>();
         _AP_Password = iot["AP_Pw"].isNull() ? DEFAULT_AP_PASSWORD : iot["AP_Pw"].as<String>();
@@ -231,7 +229,6 @@ void IOT::loadSettings() {
         _SIM_Password = iot["SIM_PASSWORD"].isNull() ? "" : iot["SIM_PASSWORD"].as<String>();
         _SIM_PIN = iot["SIM_PIN"].isNull() ? "" : iot["SIM_PIN"].as<String>();
         _useDHCP = iot["useDHCP"].isNull() ? false : iot["useDHCP"].as<bool>();
-
         _iotCB->onLoadSetting(doc);
     }
 }
@@ -253,14 +250,13 @@ void IOT::saveSettings() {
     _iotCB->onSaveSetting(doc);
     String jsonString;
     serializeJson(doc, jsonString);
-    // Serial.println(jsonString.c_str());
+    printFormattedJson(doc);
     uint32_t sum = 0;
     for (int i = 0; i < jsonString.length(); ++i) {
         int8_t byte = jsonString[i];
         EEPROM.write(i, byte);
         sum += byte;
     }
-
     EEPROM.write(jsonString.length(), '\0'); // Null-terminate the string
     EEPROM.commit();
     logd("JSON saved, required EEPROM size: %d", jsonString.length());
