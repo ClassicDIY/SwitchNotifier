@@ -47,44 +47,73 @@ const char home_html[] PROGMEM = R"rawliteral(
 	{style}
 	</head>
   	<body>
-	<h2>{n}</h2>
-	<div style='font-size: .6em;'>Firmware version '{v}'</div>
-	<hr>
-	<div class="container">
-    <div class="home-group">
-    <div id="boxes-container">
-		<fieldset class="fs"><legend>SMTP</legend>
-		<div class="desc">{stmpServer}</div>
-		<div class="desc">{stmpPort}</div>
-		<div class="desc">{senderEmail}</div>
-		<div class="desc">{recipientEmail}</div>
-		<div class="desc">{RecipientName}</div>
-		<div class="desc">{emailSubject}</div>
-		<div class="desc">{senderEmail}</div>
-		</fieldset>
-		<fieldset class="fs"><legend>Email Messages</legend>
-		{emailMessages}
-		</fieldset>
-    </div>
-	<div class="link-row">
-		<p><a href='settings'>Settings</a></p>
-		<p><a href='/log' target='_blank'>Web Log</a></p>
+	<div id="home">
+		<h2>{n}</h2>
+		<div style='font-size: .6em;'>Firmware version '{v}'</div>
+		<hr>
+		<div class="container">
+			<div class="home-group">
+				<div id="boxes-container">
+					<fieldset class="fs">
+					<legend>SMTP</legend>
+					{smtpSettings}
+					</fieldset>
+					<fieldset class="fs">
+					<legend>Email Messages</legend>
+					{emailMessages}
+					</fieldset>
+				</div>
+				<div class="link-row">
+					<p><a href='settings'>Settings</a></p>
+					<p><a href='/log' target='_blank'>Web Log</a></p>
+				</div>
+			</div>
+		</div>
 	</div>
-	</div></div></body></html>
+	</body></html>
 	)rawliteral";
 
-const char app_config_fields[] PROGMEM = R"rawliteral(
+const char snmp_config_fieldset[] PROGMEM = R"rawliteral(
+	<fieldset id="snmp" class="fs">
+	<legend>SNMP</legend>
+		<div class="conv">
+			{snmp}
+		</div>
+	</fieldset>
+)rawliteral";
+
+const char snmp_input[] PROGMEM = R"rawliteral(
+  <div class="form-grid">
+    <label for="{fld}">{fldlabel}</label>
+    <input type="text" id="{fld}" name="{fld}" value="{fldval}" maxlength="64">
+  </div>
+)rawliteral";
+
+const char snmp_select[] PROGMEM = R"rawliteral(
+  <div class="form-grid">
+    <label for="{fld}">{fldlabel}</label>
+    <select id="{fld}" name="{fld}">
+		{options}
+	</select>
+  </div>
+)rawliteral";
+
+const char snmp_select_option[] PROGMEM = R"rawliteral(
+  <option value="{fldval}" {selected}>{fldval}</option>
+)rawliteral";
+
+const char app_config_fieldset[] PROGMEM = R"rawliteral(
 	<fieldset id="app" class="fs">
-	<legend>Application</legend>
+	<legend>Email Messages</legend>
 		<div class="conv">
 			{aconv}
 		</div>
 	</fieldset>
 )rawliteral";
 
-const char app_message[] PROGMEM = R"rawliteral(
+const char app_input[] PROGMEM = R"rawliteral(
   <div class="form-grid">
-    <label for="message{bm}">Button {bm}</label>
+    <label for="message{bm}">Email text for button {bm}</label>
     <input type="text" id="message{bm}" name="message{bm}" value="{message}" maxlength="64">
   </div>
 )rawliteral";

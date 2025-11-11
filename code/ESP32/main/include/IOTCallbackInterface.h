@@ -3,9 +3,8 @@
 #include "ArduinoJson.h"
 #include <ESPAsyncWebServer.h>
 
-class IOTCallbackInterface
-{
-public:
+class IOTCallbackInterface {
+  public:
     virtual void onNetworkConnect() = 0;
     virtual void addApplicationConfigs(String &page);
     virtual void onSubmitForm(AsyncWebServerRequest *request);

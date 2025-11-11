@@ -1,10 +1,10 @@
 #pragma once
 
-#include <Arduino.h>
-#include "esp_log.h"
-#include <time.h>
 #include "defines.h"
+#include "esp_log.h"
+#include <Arduino.h>
 #include <ESPAsyncWebServer.h>
+#include <time.h>
 
 // Store HTML content with JavaScript to receive serial log data via WebSocket
 const char web_serial_html[] PROGMEM = R"rawliteral(
@@ -41,14 +41,13 @@ const char web_serial_html[] PROGMEM = R"rawliteral(
 	</html>
 	)rawliteral";
 
-class WebLog
-{
-public:
-	WebLog() {};
-	void begin(AsyncWebServer *pwebServer);
-	void end();
-	void process();
+class WebLog {
+  public:
+    WebLog() {};
+    void begin(AsyncWebServer *pwebServer);
+    void end();
+    void process();
 
-private:
-	uint32_t _lastHeap = 0;
+  private:
+    uint32_t _lastHeap = 0;
 };
