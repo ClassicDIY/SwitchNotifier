@@ -1,6 +1,8 @@
 BasedOnStyle: LLVM
-IndentWidth: 4
-ColumnLimit: 120
+IndentWidth: 3
+SortIncludes: false
+IncludeBlocks: Preserve
+ColumnLimit: 180
 BraceWrapping:
   AfterFunction: false
   AfterClass: false
@@ -11,3 +13,4 @@ BraceWrapping:
   BeforeCatch: false
   BeforeElse: false
   IndentBraces: false
+
