@@ -212,10 +212,6 @@ void Notifier::setup() {
          // 	logd("ws pong");
       }
    });
-//    if (!LittleFS.begin()) {
-//     loge("LittleFS mount failed");
-//   }
-
 }
 
 void Notifier::run() {
