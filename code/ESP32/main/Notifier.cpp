@@ -149,8 +149,8 @@ void Notifier::onSubmitForm(AsyncWebServerRequest *request) {
 void Notifier::setup() {
    logd("setup");
    _iot.Init(this, &_asyncServer);
-   // _smtp->callback(smtpCallback);
-   // _smtp->setTCPTimeout(10);
+   _smtp->callback(smtpCallback);
+   _smtp->setTCPTimeout(10);
    gpio_install_isr_service(ESP_INTR_FLAG_LOWMED);
    for (int i = 0; i < NUM_BUTTONS; ++i) {
       _buttons[i].init();
@@ -216,8 +216,6 @@ void Notifier::setup() {
 //     loge("LittleFS mount failed");
 //   }
 
-   // _smtp->callback(smtpCallback);
-   // _smtp->setTCPTimeout(10);
 }
 
 void Notifier::run() {
@@ -235,50 +233,50 @@ void Notifier::run() {
 void Notifier::sendit(const String &content) {
 
    logd("SMTP: %s:%d From:%s PW: %s To: (%s)%s", _smtpServer.c_str(), _smtpPort, _senderEmail.c_str(), _senderPassword.c_str(), _recipientName.c_str(), _recipientEmail.c_str());
-   // Session_Config session;
-   // session.server.host_name = _smtpServer.c_str();
+   Session_Config session;
+   session.server.host_name = _smtpServer.c_str();
 
-   // session.server.port = _smtpPort;
-   // session.login.email = _senderEmail.c_str();
-   // session.login.password = _senderPassword.c_str();
-   // session.login.user_domain = "";
-   // /* Declare the message class */
-   // SMTP_Message message;
-   // message.sender.name = "ESP 32";
-   // message.sender.email = _senderEmail.c_str();
-   // message.subject = _subject.c_str();
-   // message.addRecipient(_recipientName.c_str(), _recipientEmail.c_str());
-   // message.timestamp.tag = "#esp_mail_current_time";
-   // message.timestamp.format = "%B %d, %Y %H:%M:%S";
-   // // Send HTML message
-   // String htmlMsg = "<div style=\"color:#000000;\"><h1>";
-   // htmlMsg.concat(content.c_str());
-   // htmlMsg.concat("</h1><p> Mail Generated from SwitchNotifier</p></div>");
-   // message.html.content = htmlMsg.c_str();
-   // message.text.charSet = "us-ascii";
-   // message.html.transfer_encoding = Content_Transfer_Encoding::enc_7bit;
+   session.server.port = _smtpPort;
+   session.login.email = _senderEmail.c_str();
+   session.login.password = _senderPassword.c_str();
+   session.login.user_domain = "";
+   /* Declare the message class */
+   SMTP_Message message;
+   message.sender.name = "ESP 32";
+   message.sender.email = _senderEmail.c_str();
+   message.subject = _subject.c_str();
+   message.addRecipient(_recipientName.c_str(), _recipientEmail.c_str());
+   message.timestamp.tag = "#esp_mail_current_time";
+   message.timestamp.format = "%B %d, %Y %H:%M:%S";
+   // Send HTML message
+   String htmlMsg = "<div style=\"color:#000000;\"><h1>";
+   htmlMsg.concat(content.c_str());
+   htmlMsg.concat("</h1><p> Mail Generated from SwitchNotifier</p></div>");
+   message.html.content = htmlMsg.c_str();
+   message.text.charSet = "us-ascii";
+   message.html.transfer_encoding = Content_Transfer_Encoding::enc_7bit;
    // /* //Send simple text message
    // String textMsg = "How are you doing";
    // message.text.content = textMsg.c_str();
    // message.text.charSet = "us-ascii";
    // message.text.transfer_encoding = Content_Transfer_Encoding::enc_7bit;*/
 
-   // if (!_smtp->connect(&session, true)) {
-   //    loge("SMTP not connected");
-   //    return;
-   // }
-   // if (!_smtp->isLoggedIn()) {
-   //    logw("SMTP not yet logged in.");
-   // } else {
-   //    if (_smtp->isAuthenticated()) {
-   //       logi("SMTP successfully logged in.");
-   //    } else {
-   //       logw("Connected with no Auth.");
-   //    }
-   //    if (!MailClient.sendMail(_smtp, &message)) {
-   //       loge("SMTP Error, Status Code: %d, Error Code: %d, Reason: %s", _smtp->statusCode(), _smtp->errorCode(), _smtp->errorReason());
-   //    }
-   // }
+   if (!_smtp->connect(&session, true)) {
+      loge("SMTP not connected");
+      return;
+   }
+   if (!_smtp->isLoggedIn()) {
+      logw("SMTP not yet logged in.");
+   } else {
+      if (_smtp->isAuthenticated()) {
+         logi("SMTP successfully logged in.");
+      } else {
+         logw("Connected with no Auth.");
+      }
+      if (!MailClient.sendMail(_smtp, &message)) {
+         loge("SMTP Error, Status Code: %d, Error Code: %d, Reason: %s", _smtp->statusCode(), _smtp->errorCode(), _smtp->errorReason());
+      }
+   }
 }
 
 } // namespace CLASSICDIY
