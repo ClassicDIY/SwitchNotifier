@@ -1,18 +1,18 @@
 #pragma once
-#include "Defines.h"
-#include "Log.h"
 #include <Arduino.h>
 #include <AsyncTCP.h>
 #include <ESPAsyncWebServer.h>
+#include "Defines.h"
+#include "Log.h"
 
 namespace CLASSICDIY {
 class OTA {
-  public:
-    OTA() {};
-    void begin(AsyncWebServer *asyncServer);
+ public:
+   OTA() {};
+   void begin(AsyncWebServer *asyncServer);
 
-  private:
-    AsyncWebServer *_pAsyncServer;
+ private:
+   AsyncWebServer *_pAsyncServer;
 };
 
 const char update_firmware_html[] PROGMEM = R"rawliteral(

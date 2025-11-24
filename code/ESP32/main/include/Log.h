@@ -1,10 +1,10 @@
 #pragma once
 
-#include "defines.h"
-#include "esp_log.h"
 #include <Arduino.h>
 #include <ArduinoJson.h>
+#include "esp_log.h"
 #include <time.h>
+#include "defines.h"
 
 int weblog(const char *format, ...);
 
@@ -40,30 +40,28 @@ int weblog(const char *format, ...);
 
 void inline printHexString(const uint8_t *ptr, int len) {
 #if APP_LOG_LEVEL >= ARDUHAL_LOG_LEVEL_DEBUG
-    esp_log_level_set(TAG, ESP_LOG_DEBUG);
-    esp_log_buffer_hex_internal(TAG, ptr, len, ESP_LOG_DEBUG);
+   esp_log_level_set(TAG, ESP_LOG_DEBUG);
+   esp_log_buffer_hex_internal(TAG, ptr, len, ESP_LOG_DEBUG);
 #endif
 }
 
 void inline printLocalTime() {
 #if APP_LOG_LEVEL >= ARDUHAL_LOG_LEVEL_DEBUG
-    struct tm timeinfo;
-    if (!getLocalTime(&timeinfo)) {
-        logi("Failed to obtain time");
-        return;
-    }
-    char buf[64];
-    buf[0] = 0;
-    strftime(buf, 64, "%A, %B %d %Y %H:%M:%S", &timeinfo);
-    logi("Date Time: %s", buf);
+   struct tm timeinfo;
+   if (!getLocalTime(&timeinfo)) {
+      logi("Failed to obtain time");
+      return;
+   }
+   char buf[64];
+   buf[0] = 0;
+   strftime(buf, 64, "%A, %B %d %Y %H:%M:%S", &timeinfo);
+   logi("Date Time: %s", buf);
 #endif
 }
 
-void inline printFormattedJson(const JsonDocument& doc) {
-    #if APP_LOG_LEVEL >= ARDUHAL_LOG_LEVEL_DEBUG
-    serializeJsonPretty(doc, Serial);
-    Serial.println(); // Ensure newline after output
-    #endif
+void inline printFormattedJson(const JsonDocument &doc) {
+#if APP_LOG_LEVEL >= ARDUHAL_LOG_LEVEL_DEBUG
+   serializeJsonPretty(doc, Serial);
+   Serial.println(); // Ensure newline after output
+#endif
 }
-
-

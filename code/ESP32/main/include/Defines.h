@@ -5,8 +5,8 @@
 
 #define TAG "SwitchNotifier"
 
-#define STR_LEN 255                            // general string buffer size
-#define CONFIG_LEN 32                         // configuration string buffer size
+#define STR_LEN 255   // general string buffer size
+#define CONFIG_LEN 32 // configuration string buffer size
 #define NUMBER_CONFIG_LEN 6
 #define EEPROM_SIZE 2048
 #define AP_BLINK_RATE 600
@@ -21,7 +21,7 @@
 #define WIFI_CONNECTION_TIMEOUT 120000
 #define DEFAULT_AP_PASSWORD "12345678"
 
-#define WATCHDOG_TIMER 600000 //time in ms to trigger the watchdog
+#define WATCHDOG_TIMER 600000 // time in ms to trigger the watchdog
 
 #define SMTP_server "smtp.gmail.com"
 #define SMTP_Port 465
@@ -31,5 +31,3 @@
 
 #define ASYNC_WEBSERVER_PORT 80
 #define DNS_PORT 53
-
-

@@ -35,3 +35,4 @@
 ./code/ESP32/.vscode/
 ./code/ESP32/.pio/
 ./code/ESP32/dependencies.lock
+./code/ESP32/build/

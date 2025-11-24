@@ -1,5 +1,6 @@
 {
   "build": {
+    "partitions": "partitions/min_spiffs.csv",
     "arduino":{
       "ldscript": "esp32_out.ld"
     },
@@ -25,8 +26,8 @@
   "name": "NORVI GSM",
   "upload": {
     "flash_size": "4MB",
-    "maximum_ram_size": 327680,
-    "maximum_size": 4194304,
+    "maximum_ram_size": 131072,
+    "maximum_size": 1966080,
     "require_upload_port": true,
     "speed": 460800
   },
