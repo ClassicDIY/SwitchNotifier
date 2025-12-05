@@ -4,6 +4,8 @@
 #include "esp_mac.h"
 #include "esp_timer.h"
 
+namespace CLASSICDIY {
+
 class Button {
  public:
    gpio_num_t pin;
@@ -36,3 +38,5 @@ class Button {
       btn->handleInterrupt();
    }
 };
+
+}

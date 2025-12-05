@@ -5,6 +5,7 @@
 // #define ESP_MAIL_DEFAULT_FLASH_FS LittleFS
 #include <ESP_Mail_Client.h>
 #include "Defines.h"
+#include "Enumerations.h"
 #include "log.h"
 #include "Button.h"
 #include "IOTCallbackInterface.h"
@@ -20,14 +21,14 @@ class Notifier : public IOTCallbackInterface {
    void run();
 
    // IOTCallbackInterface
-   void onNetworkConnect() {};
-   void addApplicationConfigs(String &page);
-   void onSubmitForm(AsyncWebServerRequest *request);
+   void onNetworkState(NetworkState state) { _networkState = state; };
    void onSaveSetting(JsonDocument &doc);
    void onLoadSetting(JsonDocument &doc);
+   String appTemplateProcessor(const String &var);
 
  protected:
-   SMTPSession* _smtp;
+   NetworkState _networkState = Boot;
+   SMTPSession *_smtp;
    void sendit(const String &content);
    String _smtpServer = SMTP_server;
    uint16_t _smtpPort = SMTP_Port;
@@ -41,6 +42,8 @@ class Notifier : public IOTCallbackInterface {
 #else
    Button _buttons[NUM_BUTTONS] = {Button(DI0), Button(DI1), Button(DI2), Button(DI3), Button(DI4), Button(DI5), Button(DI6), Button(DI7)};
 #endif
+ private:
+   String _bodyBuffer;
 };
 
 } // namespace CLASSICDIY

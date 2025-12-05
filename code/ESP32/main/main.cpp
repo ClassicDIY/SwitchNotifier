@@ -11,6 +11,7 @@
 #include "Notifier.h"
 
 using namespace CLASSICDIY;
+
 static Main my_main;
 Notifier _notifier = Notifier();
 hw_timer_t *_watchdogTimer = NULL;

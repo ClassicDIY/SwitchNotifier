@@ -43,19 +43,15 @@ class IOT : public IOTServiceInterface {
 #endif
 
 #ifdef HasModbus
-   boolean ModbusBridgeEnabled();
    void registerMBTCPWorkers(FunctionCode fc, MBSworker worker);
-   Modbus::Error SendToModbusBridgeAsync(ModbusMessage &request);
    uint16_t getMBBaseAddress(IOTypes type);
-#else
-boolean ModbusBridgeEnabled() {return false;};
 #endif
 
  private:
    OTA _OTA = OTA();
    AsyncWebServer *_pwebServer;
    NetworkState _networkState = Boot;
-   NetworkSelection _NetworkSelection = NotConnected;
+   NetworkSelection _NetworkSelection = APMode;
    bool _blinkStateOn = false;
    String _AP_SSID = TAG;
    String _AP_Password = DEFAULT_AP_PASSWORD;
@@ -73,6 +69,7 @@ boolean ModbusBridgeEnabled() {return false;};
    String _Gateway_IP;
    uint32_t _settingsChecksum = 0;
    bool _needToReboot = false;
+   String _bodyBuffer;
 
 #ifdef HasMQTT
    bool _useMQTT = false;
@@ -109,17 +106,6 @@ boolean ModbusBridgeEnabled() {return false;};
    uart_parity_t _modbusParity = UART_PARITY_DISABLE;
    uart_stop_bits_t _modbusStopBits = UART_STOP_BITS_1;
    uint16_t _modbusID = 1;
-
-   bool _useModbusBridge = false;
-   unsigned long _modbusClientBaudRate = 9600;
-   uart_parity_t _modbusClientParity = UART_PARITY_DISABLE;
-   uart_stop_bits_t _modbusClientStopBits = UART_STOP_BITS_1;
-   uint32_t _Token = 1000;
-   uint32_t nextToken() {
-      _Token++;
-      _Token %= 65535;
-      return _Token;
-   }
    uint16_t _input_register_base_addr = INPUT_REGISTER_BASE_ADDRESS;
    uint16_t _coil_base_addr = COIL_BASE_ADDRESS;
    uint16_t _discrete_input_base_addr = DISCRETE_BASE_ADDRESS;
@@ -132,12 +118,15 @@ boolean ModbusBridgeEnabled() {return false;};
    unsigned long _lastBootTimeStamp = millis();
    unsigned long _waitInAPTimeStamp = millis();
    unsigned long _NetworkConnectionStart = 0;
+   unsigned long _GPIO0_PressedCountdown = 0;
    unsigned long _FlasherIPConfigStart = millis();
    void RedirectToHome(AsyncWebServerRequest *request);
    void UpdateOledDisplay();
    void GoOffline();
    void saveSettings();
    void loadSettings();
+   void loadSettingsFromJson(JsonDocument &doc);
+   void saveSettingsToJson(JsonDocument &doc);
    void setState(NetworkState newState);
 #ifdef HasLTE
    void wakeup_modem(void);
