@@ -124,7 +124,7 @@ void inline GPIO_Init() { pinMode(BUTTONS, INPUT); }
 
 #elif LILYGO_T_SIM7600G
 
-#define NUM_BUTTONS 2 // Number of digital input buttons
+#define NUM_BUTTONS 8 // Number of digital input buttons
 
 #define WIFI_STATUS_PIN 12  // LED Pin
 #define FACTORY_RESET_PIN 2 // Clear NVRAM
@@ -145,18 +145,15 @@ void inline GPIO_Init() {}
 #define LTE_TXD GPIO_NUM_27
 #define LTE_RXD GPIO_NUM_26
 
-// digital outputs
-#define DO0 GPIO_NUM_14
-#define DO1 GPIO_NUM_15
-
 // digital inputs
-#define DI0 GPIO_NUM_12
+#define DI0 GPIO_NUM_5
 #define DI1 GPIO_NUM_13
-
-#define BUTTON_1 GPIO_NUM_02
-#define BUTTON_2 GPIO_NUM_15
-#define BUTTON_3 GPIO_NUM_14
-#define BUTTON_4 GPIO_NUM_13
+#define DI2 GPIO_NUM_14
+#define DI3 GPIO_NUM_15
+#define DI4 GPIO_NUM_2
+#define DI5 GPIO_NUM_23
+#define DI6 GPIO_NUM_19
+#define DI7 GPIO_NUM_18
 
 #elif ESP32_Dev
 

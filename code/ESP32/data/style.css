@@ -54,7 +54,7 @@ const char iot_style[] PROGMEM = R"rawliteral(
         display: inline-block;
         border-radius: 0.3rem;
         margin: 0px;
-        width: 95%;
+        width: 100%;
     }
 
     .box {
@@ -72,6 +72,14 @@ const char iot_style[] PROGMEM = R"rawliteral(
 
     .desc {
         font-size: .8em;
+    }
+
+    .info {
+        margin: 5px;
+        font-size:1.5rem;
+        font-weight: bold;
+        text-align: left;
+        margin-bottom: 10px;
     }
 
     .app-range-row {

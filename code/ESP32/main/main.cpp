@@ -1,5 +1,6 @@
 #include <Arduino.h>
 #include "esp_task_wdt.h"
+#include <time.h>
 #include <SPI.h>
 #ifdef Has_OLED_Display
 #include <Adafruit_GFX.h>

@@ -2,6 +2,7 @@
 #include <ESPAsyncWebServer.h>
 #include "Notifier.h"
 #include "HelperFunctions.h"
+#include "Enumerations.h"
 #include "IOT.h"
 #include "Log.h"
 #include "app.htm"
@@ -170,6 +171,14 @@ String Notifier::appTemplateProcessor(const String &var) {
    return String("");
 }
 
+void Notifier::onNetworkState(NetworkState state) {
+   _networkState = state;
+   if (state == OnLine) {
+      configTime(0, 0, NTP_SERVER1, NTP_SERVER2);
+      setenv("TZ", "EST+5EDT,M3.2.0/2,M11.1.0/2", 3);
+      tzset();
+   }
+};
 void Notifier::run() {
    _iot.Run();
    for (int i = 0; i < NUM_BUTTONS; i++) {

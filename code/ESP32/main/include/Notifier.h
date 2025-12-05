@@ -21,7 +21,7 @@ class Notifier : public IOTCallbackInterface {
    void run();
 
    // IOTCallbackInterface
-   void onNetworkState(NetworkState state) { _networkState = state; };
+   void onNetworkState(NetworkState state);
    void onSaveSetting(JsonDocument &doc);
    void onLoadSetting(JsonDocument &doc);
    String appTemplateProcessor(const String &var);
@@ -38,7 +38,7 @@ class Notifier : public IOTCallbackInterface {
    String _recipientName = "tarzan";
    String _subject = "Switch Notifier";
 #ifdef LILYGO_T_SIM7600G
-   Button _buttons[NUM_BUTTONS] = {Button(DI0), Button(DI1)};
+   Button _buttons[NUM_BUTTONS] = {Button(DI0), Button(DI1),Button(DI2), Button(DI3),Button(DI4), Button(DI5),Button(DI6), Button(DI7)};
 #else
    Button _buttons[NUM_BUTTONS] = {Button(DI0), Button(DI1), Button(DI2), Button(DI3), Button(DI4), Button(DI5), Button(DI6), Button(DI7)};
 #endif

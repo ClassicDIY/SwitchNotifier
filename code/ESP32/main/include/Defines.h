@@ -5,6 +5,8 @@
 
 #define TAG "SwitchNotifier"
 
+#define NTP_SERVER1 "pool.ntp.org"
+#define NTP_SERVER2 "time.nist.gov"
 #define STR_LEN 255   // general string buffer size
 #define CONFIG_LEN 32 // configuration string buffer size
 #define NUMBER_CONFIG_LEN 6
