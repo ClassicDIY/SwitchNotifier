@@ -13,7 +13,7 @@ class Button {
    volatile bool pressed = false;
    int64_t lastTriggerTime = 0;
 
-   Button(gpio_num_t p) : pin(p), message("") {}
+   Button(gpio_num_t p) : pin(p), message("email message") {}
 
    void init() {
       gpio_config_t io_conf = {};

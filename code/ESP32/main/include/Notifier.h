@@ -5,15 +5,17 @@
 // #define ESP_MAIL_DEFAULT_FLASH_FS LittleFS
 #include <ESP_Mail_Client.h>
 #include "Defines.h"
+#include "Device.h"
 #include "Enumerations.h"
 #include "log.h"
 #include "Button.h"
 #include "IOTCallbackInterface.h"
 #include "IOTServiceInterface.h"
+#include "IDisplayServiceInterface.h"
 
 namespace CLASSICDIY {
 
-class Notifier : public IOTCallbackInterface {
+class Notifier : public Device, public IOTCallbackInterface {
  public:
    Notifier();
    ~Notifier();
@@ -25,9 +27,11 @@ class Notifier : public IOTCallbackInterface {
    void onSaveSetting(JsonDocument &doc);
    void onLoadSetting(JsonDocument &doc);
    String appTemplateProcessor(const String &var);
+#ifdef Has_OLED
+   IDisplayServiceInterface& getDisplayInterface() override {  return _oled; };
+#endif
 
  protected:
-   NetworkState _networkState = Boot;
    SMTPSession *_smtp;
    void sendit(const String &content);
    String _smtpServer = SMTP_server;

@@ -9,8 +9,6 @@
 #endif
 #define FACTORY_RESET_PIN 2 // Clear NVRAM, shared with CAN_RXD
 
-void inline GPIO_Init() {}
-
 // Programming and Debugging Port
 #define U0_TXD GPIO_NUM_43
 #define U0_RXD GPIO_NUM_44
@@ -76,8 +74,6 @@ void inline GPIO_Init() {}
 
 #define BUTTONS GPIO_NUM_36 // Analog pin to read buttons
 
-void inline GPIO_Init() { pinMode(BUTTONS, INPUT); }
-
 // Programming and Debugging Port
 #define U0_TXD GPIO_NUM_3
 #define U0_RXD GPIO_NUM_1
@@ -129,8 +125,6 @@ void inline GPIO_Init() { pinMode(BUTTONS, INPUT); }
 #define WIFI_STATUS_PIN 12  // LED Pin
 #define FACTORY_RESET_PIN 2 // Clear NVRAM
 
-void inline GPIO_Init() {}
-
 // Programming and Debugging Port
 #define U0_TXD GPIO_NUM_01
 #define U0_RXD GPIO_NUM_03
@@ -160,8 +154,6 @@ void inline GPIO_Init() {}
 #define WIFI_STATUS_PIN GPIO_NUM_2   // LED Pin
 #define FACTORY_RESET_PIN GPIO_NUM_4 // Clear NVRAM
 
-void inline GPIO_Init() {}
-
 // I2C
 #define I2C_SDA GPIO_NUM_21
 #define I2C_SCL GPIO_NUM_22
@@ -175,5 +167,23 @@ void inline GPIO_Init() {}
 #define DI5 GPIO_NUM_25
 #define DI6 GPIO_NUM_33
 #define DI7 GPIO_NUM_32
+
+#elif ESP32_S3
+
+#define FACTORY_RESET_PIN GPIO_NUM_14 // Clear NVRAM
+
+// I2C
+#define I2C_SDA GPIO_NUM_8
+#define I2C_SCL GPIO_NUM_9
+
+#define NUM_BUTTONS 8 // Number of digital input buttons
+#define DI0 GPIO_NUM_4
+#define DI1 GPIO_NUM_5
+#define DI2 GPIO_NUM_6
+#define DI3 GPIO_NUM_7
+#define DI4 GPIO_NUM_15
+#define DI5 GPIO_NUM_16
+#define DI6 GPIO_NUM_17
+#define DI7 GPIO_NUM_18
 
 #endif

@@ -1,5 +1,6 @@
 {
   "build": {
+    "partitions": "partitions/default_4MB.csv",
     "arduino":{
       "ldscript": "esp32_out.ld"
     },
@@ -13,9 +14,7 @@
   },
   "connectivity": [
     "wifi",
-    "bluetooth",
-    "ethernet",
-    "can"
+    "bluetooth"
   ],
   "debug": {
     "openocd_board": "esp-wroom-32.cfg"

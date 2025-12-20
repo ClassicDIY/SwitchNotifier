@@ -23,7 +23,7 @@ Notifier::~Notifier() { delete _smtp; }
 void smtpCallback(SMTP_Status status) { logi("%s", status.info()); }
 
 void Notifier::setup() {
-   logd("setup");
+   Init();
    _iot.Init(this, &_asyncServer);
    _smtp->callback(smtpCallback);
    _smtp->setTCPTimeout(10);
@@ -181,6 +181,7 @@ void Notifier::onNetworkState(NetworkState state) {
 };
 void Notifier::run() {
    _iot.Run();
+   Run(); // base class
    for (int i = 0; i < NUM_BUTTONS; i++) {
       if (_buttons[i].pressed) {
          _buttons[i].pressed = false;
