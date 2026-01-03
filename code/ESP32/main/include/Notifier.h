@@ -3,17 +3,17 @@
 #include <ArduinoJson.h>
 // #include <LittleFS.h>
 // #define ESP_MAIL_DEFAULT_FLASH_FS LittleFS
+#include <ESPAsyncWebServer.h>
 #include <ESP_Mail_Client.h>
 #include "Defines.h"
+#include "IOT_Defines.h"
 #include "Device.h"
-#include "Enumerations.h"
+#include "IOTEnumerations.h"
 #include "log.h"
 #include "Button.h"
 #include "IOTCallbackInterface.h"
 #include "IOTServiceInterface.h"
 #include "IDisplayServiceInterface.h"
-
-namespace CLASSICDIY {
 
 class Notifier : public Device, public IOTCallbackInterface {
  public:
@@ -24,6 +24,7 @@ class Notifier : public Device, public IOTCallbackInterface {
 
    // IOTCallbackInterface
    void onNetworkState(NetworkState state);
+   void onSocketPong();
    void onSaveSetting(JsonDocument &doc);
    void onLoadSetting(JsonDocument &doc);
    String appTemplateProcessor(const String &var);
@@ -50,4 +51,3 @@ class Notifier : public Device, public IOTCallbackInterface {
    String _bodyBuffer;
 };
 
-} // namespace CLASSICDIY

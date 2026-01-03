@@ -8,8 +8,6 @@
 #include "Log.h"
 #include "Device.h"
 
-namespace CLASSICDIY {
-
 void Device::InitCommon() {
    Wire.begin(I2C_SDA, I2C_SCL);
 #ifdef UseLittleFS
@@ -26,23 +24,9 @@ void Device::InitCommon() {
 
 void Device::Init() {
    InitCommon();
-   pinMode(FACTORY_RESET_PIN, INPUT_PULLUP);
-   pinMode(WIFI_STATUS_PIN, OUTPUT);
 }
 
 void Device::Run() {
-   // handle blink led, fast : NotConnected slow: AP connected On: Station connected
-   if (_networkState != OnLine) {
-      unsigned long binkRate = _networkState == ApState ? AP_BLINK_RATE : NC_BLINK_RATE;
-      unsigned long now = millis();
-      if (binkRate < now - _lastBlinkTime) {
-         _blinkStateOn = !_blinkStateOn;
-         _lastBlinkTime = now;
-         digitalWrite(WIFI_STATUS_PIN, _blinkStateOn ? HIGH : LOW);
-      }
-   } else {
-      digitalWrite(WIFI_STATUS_PIN, LOW);
-   }
 }
 
 #endif
@@ -51,7 +35,6 @@ void Device::Run() {
 
 void Device::Init() {
    InitCommon();
-   pinMode(FACTORY_RESET_PIN, INPUT_PULLUP);
 }
 
 void Device::Run() {
@@ -84,25 +67,11 @@ void Device::Run() {}
 
 void Device::Init() {
    InitCommon();
-   pinMode(FACTORY_RESET_PIN, INPUT_PULLUP);
-   pinMode(WIFI_STATUS_PIN, OUTPUT);
 }
 
 void Device::Run() {
-   // handle blink led, fast : NotConnected slow: AP connected On: Station connected
-   if (_networkState != OnLine) {
-      unsigned long binkRate = _networkState == ApState ? AP_BLINK_RATE : NC_BLINK_RATE;
-      unsigned long now = millis();
-      if (binkRate < now - _lastBlinkTime) {
-         _blinkStateOn = !_blinkStateOn;
-         _lastBlinkTime = now;
-         digitalWrite(WIFI_STATUS_PIN, _blinkStateOn ? HIGH : LOW);
-      }
-   } else {
-      digitalWrite(WIFI_STATUS_PIN, LOW);
-   }
+
 }
 
 #endif
 
-} // namespace CLASSICDIY

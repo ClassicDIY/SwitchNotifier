@@ -5,9 +5,8 @@
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
 #include "IDisplayServiceInterface.h"
-#include "Enumerations.h"
+#include "IOTEnumerations.h"
 
-namespace CLASSICDIY {
 #define LEVEL_FONT 5
 #define STATUS_FONT 2
 #define HDR_FONT 2
@@ -18,6 +17,8 @@ namespace CLASSICDIY {
 #define LEVEL_Y 24
 #define STATUS_Y 0
 #define BUF_SIZE 32
+
+using namespace CLASSICDIY;
 
 class Oled : public IDisplayServiceInterface {
  public:
@@ -30,5 +31,4 @@ class Oled : public IDisplayServiceInterface {
    uint8_t xOffset(uint8_t textSize, uint8_t numberOfCharaters);
 };
 
-} // namespace CLASSICDIY
 #endif

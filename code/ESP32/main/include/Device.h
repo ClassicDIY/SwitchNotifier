@@ -1,10 +1,11 @@
 #pragma once
 #include <Arduino.h>
 #include "GPIO_pins.h"
-#include "Enumerations.h"
+#include "IOTEnumerations.h"
 #include "Oled.h"
 
-namespace CLASSICDIY {
+using namespace CLASSICDIY;
+
 class Device {
  protected:
    void Init();
@@ -19,4 +20,3 @@ class Device {
    bool _running = false;
 };
 
-} // namespace CLASSICDIY

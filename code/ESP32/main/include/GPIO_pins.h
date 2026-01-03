@@ -2,12 +2,6 @@
 #include <Arduino.h>
 
 #ifdef EDGEBOX
-#define NUM_BUTTONS 4      // Number of digital input buttons
-#ifndef LOG_TO_SERIAL_PORT // disable logs to use LED wifi status
-// use LED if the log level is none (edgeBox shares the LED pin with the serial TX gpio)
-#define WIFI_STATUS_PIN 43 // LED Pin
-#endif
-#define FACTORY_RESET_PIN 2 // Clear NVRAM, shared with CAN_RXD
 
 // Programming and Debugging Port
 #define U0_TXD GPIO_NUM_43
@@ -27,17 +21,6 @@
 #define ETH_SCK GPIO_NUM_13
 #define ETH_INT GPIO_NUM_14
 #define ETH_RST GPIO_NUM_15
-
-// A7670G
-#define LTE_AIRPLANE_MODE GPIO_NUM_16
-#define LTE_PWR_EN GPIO_NUM_21
-#define LTE_TXD GPIO_NUM_48
-#define LTE_RXD GPIO_NUM_47
-
-// RS485
-#define RS485_TXD GPIO_NUM_17
-#define RS485_RXD GPIO_NUM_18
-#define RS485_RTS GPIO_NUM_8
 
 // CAN BUS
 #define CAN_TXD GPIO_NUM_1
@@ -82,17 +65,6 @@
 #define I2C_SDA GPIO_NUM_16
 #define I2C_SCL GPIO_NUM_17
 
-// GSM Modem
-#define UART_BAUD 115200
-#define LTE_PWR_EN GPIO_NUM_21
-#define LTE_TXD GPIO_NUM_32
-#define LTE_RXD GPIO_NUM_33
-
-// RS485
-#define RS485_TXD GPIO_NUM_26
-#define RS485_RXD GPIO_NUM_25
-#define RS485_RTS GPIO_NUM_22
-
 #define DO0 GPIO_NUM_12
 #define DO1 GPIO_NUM_2
 
@@ -114,6 +86,7 @@
 // No Analog output
 
 // OLED display definitions
+#define SCREEN_ADDRESS 0x3C // OLED 128X64 I2C address
 #define SCREEN_WIDTH 128 // OLED display width, in pixels
 #define SCREEN_HEIGHT 64 // OLED display height, in pixels
 #define OLED_RESET -1    // Reset pin # (or -1 if sharing Arduino reset pin)
@@ -122,9 +95,6 @@
 
 #define NUM_BUTTONS 8 // Number of digital input buttons
 
-#define WIFI_STATUS_PIN 12  // LED Pin
-#define FACTORY_RESET_PIN 2 // Clear NVRAM
-
 // Programming and Debugging Port
 #define U0_TXD GPIO_NUM_01
 #define U0_RXD GPIO_NUM_03
@@ -132,12 +102,6 @@
 // I2C
 #define I2C_SDA GPIO_NUM_21
 #define I2C_SCL GPIO_NUM_22
-
-// GSM Modem
-#define LTE_AIRPLANE_MODE GPIO_NUM_25 // SIM7600G airplane mode pin, High to exit.
-#define LTE_PWR_EN GPIO_NUM_4         // send power to the modem
-#define LTE_TXD GPIO_NUM_27
-#define LTE_RXD GPIO_NUM_26
 
 // digital inputs
 #define DI0 GPIO_NUM_5
@@ -150,9 +114,6 @@
 #define DI7 GPIO_NUM_18
 
 #elif ESP32_Dev
-
-#define WIFI_STATUS_PIN GPIO_NUM_2   // LED Pin
-#define FACTORY_RESET_PIN GPIO_NUM_4 // Clear NVRAM
 
 // I2C
 #define I2C_SDA GPIO_NUM_21
@@ -169,8 +130,6 @@
 #define DI7 GPIO_NUM_32
 
 #elif ESP32_S3
-
-#define FACTORY_RESET_PIN GPIO_NUM_14 // Clear NVRAM
 
 // I2C
 #define I2C_SDA GPIO_NUM_8
