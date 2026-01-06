@@ -2,7 +2,7 @@
 dependencies:
   espressif/esp_modem: "^1.4.2"
   ## Required IDF version
-  idf:
-    version: ">=4.4.0"
+idf:
+  version: ">=4.4.0"
   # espressif/esp-modbus:
   #   version: "^1.0"
