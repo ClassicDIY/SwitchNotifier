@@ -5,7 +5,6 @@
 #include "IOT.h"
 #include "Log.h"
 #include "app.htm"
-#include "app_script.js"
 
 IOT _iot = IOT();
 
@@ -89,9 +88,6 @@ String Notifier::appTemplateProcessor(const String &var) {
          msg_flds += msg_fld;
       }
       return String(msg_flds);
-   }
-   if (var == "app_script_js") {
-      return String(app_script_js);
    }
    logd("Did not find app template for: %s", var.c_str());
    return String("");
