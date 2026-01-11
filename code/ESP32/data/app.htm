@@ -73,22 +73,20 @@ const char home_html[] PROGMEM = R"rawliteral(
 
 const char snmp_config_fieldset[] PROGMEM = R"rawliteral(
 	<fieldset id="snmp" class="fs">
-	<legend>SNMP</legend>
-		<div class="state_box">
-			<div class="form-grid">
-				<label for="smtpServer">SMTP Server</label> <input type="text" id="smtpServer" name="smtpServer" maxlength="64">
-				<label for="smtpPort">SMTP Port</label><select id="smtpPort" name="smtpPort">
-					<option value="25" >25</option>
-					<option value="465" >465</option>
-					<option value="587" >587</option>
-					<option value="2525" >2525</option>
-				</select>
-				<label for="senderEmail">Sender Email</label> <input type="text" id="senderEmail" name="senderEmail" maxlength="64">
-				<label for="senderPassword">Sender Password</label> <input type="text" id="senderPassword" name="senderPassword" maxlength="64">
-				<label for="recipientEmail">Recipient Email</label> <input type="text" id="recipientEmail" name="recipientEmail" maxlength="64">
-				<label for="recipientName">Recipient Name</label> <input type="text" id="recipientName" name="recipientName" maxlength="64">
-				<label for="subject">Subject</label> <input type="text" id="subject" name="subject" maxlength="64">
-			</div>
+		<legend>SNMP</legend>
+		<div class="form-grid">
+			<label for="smtpServer">SMTP Server</label> <input type="text" id="smtpServer" name="smtpServer" maxlength="64">
+			<label for="smtpPort">SMTP Port</label><select id="smtpPort" name="smtpPort">
+				<option value="25" >25</option>
+				<option value="465" >465</option>
+				<option value="587" >587</option>
+				<option value="2525" >2525</option>
+			</select>
+			<label for="senderEmail">Sender Email</label> <input type="text" id="senderEmail" name="senderEmail" maxlength="64">
+			<label for="senderPassword">Sender Password</label> <input type="text" id="senderPassword" name="senderPassword" maxlength="64">
+			<label for="recipientEmail">Recipient Email</label> <input type="text" id="recipientEmail" name="recipientEmail" maxlength="64">
+			<label for="recipientName">Recipient Name</label> <input type="text" id="recipientName" name="recipientName" maxlength="64">
+			<label for="subject">Subject</label> <input type="text" id="subject" name="subject" maxlength="64">
 		</div>
 	</fieldset>
 	<fieldset id="app" class="fs">
